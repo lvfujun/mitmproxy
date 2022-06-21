@@ -54,7 +54,7 @@ export function EventlogToggle() {
             value={visible}
             onChange={() => dispatch(eventLogActions.toggleVisibility())}
         >
-            Display Event Log
+            显示事件日志
         </MenuToggle>
     )
 }
@@ -68,7 +68,7 @@ export function CommandBarToggle() {
             value={visible}
             onChange={() => dispatch(commandBarActions.toggleVisibility())}
         >
-            Display Command Bar
+            显示命令栏
         </MenuToggle>
     )
 }

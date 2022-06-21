@@ -28,6 +28,8 @@ from mitmproxy.tcp import TCPFlow, TCPMessage
 from mitmproxy.utils.emoji import emoji
 from mitmproxy.utils.strutils import always_str
 from mitmproxy.websocket import WebSocketMessage
+from mitmproxy.utils import resetId
+os.environ['TZ'] = 'Asia/Shanghai'
 
 
 def cert_to_json(certs: Sequence[certs.Cert]) -> Optional[dict]:
@@ -54,6 +56,7 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
     Sync with web/src/flow.ts.
     """
     f = {
+        "incId": flow.incId,
         "id": flow.id,
         "intercepted": flow.intercepted,
         "is_replay": flow.is_replay,
@@ -326,8 +329,10 @@ class DumpFlows(RequestHandler):
 
 class ClearAll(RequestHandler):
     def post(self):
+        self.view.clear_not_marked()
         self.view.clear()
         self.master.events.clear()
+        resetId()
 
 
 class ResumeFlows(RequestHandler):
@@ -625,7 +630,7 @@ class Application(tornado.web.Application):
             default_host="dns-rebind-protection",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=True,
+            xsrf_cookies=False,
             cookie_secret=os.urandom(256),
             debug=debug,
             autoreload=False,

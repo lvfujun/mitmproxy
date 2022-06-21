@@ -90,7 +90,7 @@ class Options(optmanager.OptManager):
             regular expression and matched on the ip or the hostname.
             """,
         )
-        self.add_option("allow_hosts", Sequence[str], [], "Opposite of --ignore-hosts.")
+        self.add_option("allow_hosts", Sequence[str], [], "这个选项的作用是用来控制你想抓包的域名/ip")
         self.add_option("listen_host", str, "", "Address to bind proxy to.")
         self.add_option("listen_port", int, LISTEN_PORT, "Proxy service port.")
         self.add_option(

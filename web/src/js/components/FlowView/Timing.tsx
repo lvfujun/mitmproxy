@@ -100,4 +100,4 @@ export default function Timing({flow}: { flow: Flow }) {
         </section>
     )
 }
-Timing.displayName = "Timing"
+Timing.displayName = "耗时详情"

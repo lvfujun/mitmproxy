@@ -51,10 +51,10 @@ export default class FilterDocs extends Component<FilterDocsProps, FilterDocsSta
                     ))}
                     <tr key="docs-link">
                         <td colSpan={2}>
-                            <a href="https://mitmproxy.org/docs/latest/concepts-filters/"
+                            <a href="http://wiki.66rpg.com/pages/viewpage.action?pageId=61734996"
                                 target="_blank">
                                 <i className="fa fa-external-link"/>
-                            &nbsp; mitmproxy docs</a>
+                            &nbsp; 使用文档 docs</a>
                         </td>
                     </tr>
                 </tbody>

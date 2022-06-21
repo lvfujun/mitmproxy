@@ -1,11 +1,12 @@
 import * as React from "react"
-import {FunctionComponent} from "react"
+import {FunctionComponent, useState} from "react"
 import {Request, Response} from './FlowView/HttpMessages'
 import {Request as DnsRequest, Response as DnsResponse} from './FlowView/DnsMessages'
 import Connection from './FlowView/Connection'
 import Error from "./FlowView/Error"
 import Timing from "./FlowView/Timing"
 import WebSocket from "./FlowView/WebSocket"
+import {select} from "../ducks/flows";
 
 import {selectTab} from '../ducks/ui/flow'
 import {useAppDispatch, useAppSelector} from "../ducks";
@@ -50,7 +51,8 @@ export function tabsForFlow(flow: Flow): string[] {
     return tabs;
 }
 
-export default function FlowView() {
+export default function FlowView(props) {
+    const {closeWindow} = props;
     const dispatch = useAppDispatch(),
         flow = useAppSelector(state => state.flows.byId[state.flows.selected[0]]),
         tabs = tabsForFlow(flow);
@@ -69,7 +71,7 @@ export default function FlowView() {
 
     return (
         <div className="flow-detail">
-            <nav className="nav-tabs nav-tabs-sm">
+            <nav className="nav-tabs nav-tabs-sm"><b onClick={closeWindow} style={{cursor:'pointer'}}>&nbsp;❌&nbsp;</b>
                 {tabs.map(tabId => (
                     <a key={tabId} href="#" className={classnames({active: active === tabId})}
                        onClick={event => {

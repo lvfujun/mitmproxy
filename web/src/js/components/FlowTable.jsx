@@ -17,6 +17,7 @@ class FlowTable extends React.Component {
         rowHeight: PropTypes.number,
         highlight: PropTypes.string,
         selected: PropTypes.object,
+        openWindow:PropTypes.func
     }
 
     static defaultProps = {
@@ -91,11 +92,11 @@ class FlowTable extends React.Component {
 
     render() {
         const { vScroll, viewportTop } = this.state
-        const { flows, selected, highlight } = this.props
+        const { flows, selected, highlight, openWindow } = this.props
         const isHighlighted = highlight ? Filt.parse(highlight) : () => false
 
         return (
-            <div className="flow-table" onScroll={this.onViewportUpdate}>
+            <div className="flow-table" onScroll={this.onViewportUpdate} onClick={()=>openWindow(true)}>
                 <table>
                     <thead ref="head" style={{ transform: `translateY(${viewportTop}px)` }}>
                         <FlowTableHead />

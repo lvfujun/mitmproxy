@@ -98,11 +98,11 @@ export function Request() {
     return <Message type="request" message={flow.request}/>;
 }
 
-Request.displayName = "Request"
+Request.displayName = "请求信息"
 
 export function Response() {
     const flow = useAppSelector(state => state.flows.byId[state.flows.selected[0]]) as DNSFlow & { response: DNSMessage }
     return <Message type="response" message={flow.response}/>;
 }
 
-Response.displayName = "Response"
+Response.displayName = "响应信息"

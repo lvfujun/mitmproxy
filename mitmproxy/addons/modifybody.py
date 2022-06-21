@@ -15,9 +15,10 @@ class ModifyBody:
             Sequence[str],
             [],
             """
-            Replacement pattern of the form "[/flow-filter]/regex/[@]replacement", where
-            the separator can be any character. The @ allows to provide a file path that
-            is used to read the replacement string.
+            这个主要用来替换响应内容
+            例1：/橙光/丸漫                    这个的意思是：替换所有url中响应内容搜索字符串橙光并替换为丸漫\n
+            例2：/game_info/61414/512700      这个的意思是：找到url中包含 game_info 关键词的接口在这个接口的响应内容中搜索61414并替换为512700\n
+            例3：/\/user/([game_info|user_info])/(?:61414)/xxxxx/  支持正则
             """,
         )
 

@@ -13,7 +13,7 @@ class WebAddon:
         loader.add_option(
             "web_columns",
             Sequence[str],
-            ["tls", "icon", "path", "method", "status", "size", "time"],
+            ["reqId", "tls", "icon", "path", "method", "protocol", "status", "size", "time", "timestamp"],
             "Columns to show in the flow list",
         )
 

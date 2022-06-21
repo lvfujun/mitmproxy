@@ -1,7 +1,8 @@
 import * as React from 'react'
-import {formatSize} from '../utils'
+import {fetchApi, formatSize} from '../utils'
 import HideInStatic from '../components/common/HideInStatic'
 import {useAppSelector} from "../ducks";
+import {useEffect} from "react";
 
 export default function Footer() {
     const version = useAppSelector(state => state.conf.version);
@@ -54,17 +55,27 @@ export default function Footer() {
             {stream_large_bodies && (
                 <span className="label label-success">stream: {formatSize(stream_large_bodies)}</span>
             )}
-            <div className="pull-right">
+           <div className="pull-right">
                 <HideInStatic>
+
                     {
                         server && (
                             <span className="label label-primary" title="HTTP Proxy Server Address">
-                        {listen_host || "*"}:{listen_port}
-                    </span>)
+
+                            （推荐使用）PAC代理地址：<span suppressContentEditableWarning={true} contentEditable="true">http://{window.location.hostname || "*"}/pac/{listen_port}</span>
+                            </span>
+                        )
+                    }
+                    {
+                        server && (
+                            <span className="label label-default" title="HTTP Proxy Server Address">
+                            代理地址：<span suppressContentEditableWarning={true} contentEditable="true">{window.location.hostname || "*"}:{listen_port}</span>
+                            </span>
+                        )
                     }
                 </HideInStatic>
                 <span className="label label-default" title="Mitmproxy Version">
-            mitmproxy {version}
+            (*^▽^*) Enjoy It~
             </span>
             </div>
         </footer>

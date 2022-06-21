@@ -6,7 +6,7 @@ import HideInStatic from "../common/HideInStatic";
 import * as modalActions from "../../ducks/ui/modal"
 import { useAppDispatch } from "../../ducks";
 
-OptionMenu.title = 'Options'
+OptionMenu.title = '配置'
 
 export default function OptionMenu() {
     const dispatch = useAppDispatch()
@@ -19,25 +19,25 @@ export default function OptionMenu() {
                     <div className="menu-content">
                         <Button title="Open Options" icon="fa-cogs text-primary"
                                 onClick={() => dispatch(openOptions())}>
-                            Edit Options <sup>alpha</sup>
+                            高级选项 <sup>alpha</sup>
                         </Button>
                     </div>
-                    <div className="menu-legend">Options Editor</div>
+                    <div className="menu-legend">选项编辑</div>
                 </div>
 
                 <div className="menu-group">
                     <div className="menu-content">
                         <OptionsToggle name="anticache">
-                            Strip cache headers <DocsLink resource="overview-features/#anticache"/>
+                            停用缓存（强刷每个请求） <DocsLink resource="overview-features/#anticache"/>
                         </OptionsToggle>
                         <OptionsToggle name="showhost">
-                            Use host header for display
+                            显示host
                         </OptionsToggle>
                         <OptionsToggle name="ssl_insecure">
-                            Don't verify server certificates
+                            不校验父级代理的证书
                         </OptionsToggle>
                     </div>
-                    <div className="menu-legend">Quick Options</div>
+                    <div className="menu-legend">快速选项</div>
                 </div>
             </HideInStatic>
 
@@ -46,7 +46,7 @@ export default function OptionMenu() {
                     <EventlogToggle/>
                     <CommandBarToggle/>
                 </div>
-                <div className="menu-legend">View Options</div>
+                <div className="menu-legend">视图选项</div>
             </div>
         </div>
     )

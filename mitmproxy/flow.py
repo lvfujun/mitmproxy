@@ -7,6 +7,7 @@ from mitmproxy import connection
 from mitmproxy import exceptions
 from mitmproxy import stateobject
 from mitmproxy import version
+from mitmproxy.utils import getIncId
 
 
 class Error(stateobject.StateObject):
@@ -122,6 +123,7 @@ class Flow(stateobject.StateObject):
         server_conn: connection.Server,
         live: bool = False,
     ) -> None:
+        self.incId = getIncId()
         self.id = str(uuid.uuid4())
         self.client_conn = client_conn
         self.server_conn = server_conn

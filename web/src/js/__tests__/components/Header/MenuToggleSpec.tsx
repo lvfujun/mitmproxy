@@ -38,7 +38,7 @@ test("EventlogToggle", async () => {
     expect(asFragment()).toMatchSnapshot();
 
     expect(store.getState().eventLog.visible).toBeTruthy();
-    fireEvent.click(screen.getByText("Display Event Log"));
+    fireEvent.click(screen.getByText("显示事件日志"));
 
     expect(store.getState().eventLog.visible).toBeFalsy();
 })

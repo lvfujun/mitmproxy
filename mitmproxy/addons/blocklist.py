@@ -45,11 +45,8 @@ class BlockList:
             Sequence[str],
             [],
             """
-            Block matching requests and return an empty response with the specified HTTP status.
-            Option syntax is "/flow-filter/status-code", where flow-filter describes
-            which requests this rule should be applied to and status-code is the HTTP status code to return for
-            blocked requests. The separator ("/" in the example) can be any character.
-            Setting a non-standard status code of 444 will close the connection without sending a response.
+            屏蔽请求：
+            例1：/game_info/404 搜索 url中包含game_info的请求直接响应404
             """,
         )
 
