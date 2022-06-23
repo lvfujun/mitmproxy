@@ -330,7 +330,6 @@ class DumpFlows(RequestHandler):
 class ClearAll(RequestHandler):
     def post(self):
         self.view.clear_not_marked()
-        self.view.clear()
         self.master.events.clear()
         resetId()
 

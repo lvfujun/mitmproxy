@@ -78,6 +78,7 @@ class PureOptionModal extends Component {
                             options.map(name => {
                                     let hideModal = true
                                     switch (name) {
+                                        case 'http2':
                                         case 'modify_body':
                                         case 'modify_headers':
                                         case 'allow_hosts':

@@ -11,6 +11,7 @@ Thus, the View API is very minimalistic. The only arguments are `data` and
 metadata depend on the protocol in use. Known attributes can be found in
 `base.View`.
 """
+import re
 import traceback
 from typing import Union
 from typing import Optional
@@ -175,6 +176,11 @@ def get_content_view(
         In contrast to calling the views directly, text is always safe-to-print unicode.
     """
     try:
+        if content_type == "application/json":
+            # 支持JSONP
+            matchObj = re.match(r'.+?\((.+?)\)', data.decode("utf-8"), re.M | re.I)
+            if matchObj is not None and matchObj.group(1) is not None:
+                data = matchObj.group(1).encode("utf-8")
         ret = viewmode(
             data, content_type=content_type, flow=flow, http_message=http_message
         )

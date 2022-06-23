@@ -31,18 +31,18 @@ class ProxyAppMain extends Component<ProxyAppMainProps, ProxyAppMainState> {
         if (this.state.error) {
             console.log("ERR", this.state);
             return <div className="container">
-                <h1>mitmproxy has crashed.</h1>
+                <h1>太乙发生错误</h1>
                 <pre>
                     {this.state.error.stack}
                     <br/><br/>
                     Component Stack:
                     {this.state.errorInfo?.componentStack}
                 </pre>
-
-                <p>Please lodge a bug report at <a href="https://github.com/mitmproxy/mitmproxy/issues">
-                    https://github.com/mitmproxy/mitmproxy/issues
-                </a>.
-                </p>
+                <p>请尝试刷新当前页面，并清除抓包结果。</p>
+                {/*<p>Please lodge a bug report at <a href="https://github.com/mitmproxy/mitmproxy/issues">*/}
+                {/*    https://github.com/mitmproxy/mitmproxy/issues*/}
+                {/*</a>.*/}
+                {/*</p>*/}
             </div>
         }
 

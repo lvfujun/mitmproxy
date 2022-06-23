@@ -114,7 +114,8 @@ class Options(optmanager.OptManager):
             "http2",
             bool,
             True,
-            "Enable/disable HTTP/2 support. " "HTTP/2 support is enabled by default.",
+            "开启/关闭 HTTP/2 支持. "
+            "HTTP/2 默认开启，如果遇到引擎加载失败请关闭此项.",
         )
         self.add_option(
             "http2_ping_keepalive",
