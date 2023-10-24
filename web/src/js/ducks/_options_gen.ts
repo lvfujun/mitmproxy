@@ -64,6 +64,9 @@ export interface OptionsState {
     server_replay_use_headers: string[]
     showhost: boolean
     ssl_insecure: boolean
+    filter_body_content: boolean,
+    traffic_control: boolean,
+    traffic_control_json: string,
     ssl_verify_upstream_trusted_ca: string | undefined
     ssl_verify_upstream_trusted_confdir: string | undefined
     stickyauth: string | undefined
@@ -94,7 +97,7 @@ export type Option = keyof OptionsState
 
 export const defaultState: OptionsState = {
     add_upstream_certs_to_client_chain: false,
-    allow_hosts: [],
+    allow_hosts: ['xxx'],
     anticache: false,
     anticomp: false,
     block_global: true,
@@ -157,6 +160,9 @@ export const defaultState: OptionsState = {
     server_replay_use_headers: [],
     showhost: false,
     ssl_insecure: false,
+    filter_body_content: false,
+    traffic_control: false,
+    traffic_control_json: '',
     ssl_verify_upstream_trusted_ca: undefined,
     ssl_verify_upstream_trusted_confdir: undefined,
     stickyauth: undefined,

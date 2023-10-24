@@ -42,9 +42,16 @@ class ViewJSON(base.View):
     name = "JSON"
 
     def __call__(self, data, **metadata):
+        type = "JSON"
+        if metadata['content_type'] == "application/json":
+            # 支持JSONP
+            matchObj = re.match(r'^[\w].+?\((.+)\)$', data.decode("utf-8"), re.M | re.I)
+            if matchObj is not None and matchObj.group(1) is not None:
+                data = matchObj.group(1).encode("utf-8")
+                type = "JSONP"
         data = parse_json(data)
         if data is not PARSE_ERROR:
-            return "JSON", format_json(data)
+            return type, format_json(data)
 
     def render_priority(
         self, data: bytes, *, content_type: Optional[str] = None, **metadata
@@ -54,6 +61,7 @@ class ViewJSON(base.View):
         if content_type in (
             "application/json",
             "application/json-rpc",
+            "application/jsonp",
         ):
             return 1
         if (

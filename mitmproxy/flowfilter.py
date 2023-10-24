@@ -79,7 +79,7 @@ class _Action(_Token):
 
 class FErr(_Action):
     code = "e"
-    help = "Match error"
+    help = "匹配发生错误的请求"
 
     def __call__(self, f):
         return True if f.error else False
@@ -87,7 +87,7 @@ class FErr(_Action):
 
 class FMarked(_Action):
     code = "marked"
-    help = "Match marked flows"
+    help = "匹配所有被标记的请求"
 
     def __call__(self, f):
         return bool(f.marked)
@@ -95,7 +95,7 @@ class FMarked(_Action):
 
 class FHTTP(_Action):
     code = "http"
-    help = "Match HTTP flows"
+    help = "匹配所有http请求"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
@@ -104,7 +104,7 @@ class FHTTP(_Action):
 
 class FWebSocket(_Action):
     code = "websocket"
-    help = "Match WebSocket flows"
+    help = "匹配所有websocket请求"
 
     @only(http.HTTPFlow)
     def __call__(self, f: http.HTTPFlow):
@@ -113,7 +113,7 @@ class FWebSocket(_Action):
 
 class FTCP(_Action):
     code = "tcp"
-    help = "Match TCP flows"
+    help = "匹配tcp请求"
 
     @only(tcp.TCPFlow)
     def __call__(self, f):
@@ -122,7 +122,7 @@ class FTCP(_Action):
 
 class FDNS(_Action):
     code = "dns"
-    help = "Match DNS flows"
+    help = "匹配DNS请求"
 
     @only(dns.DNSFlow)
     def __call__(self, f):
@@ -131,7 +131,7 @@ class FDNS(_Action):
 
 class FReq(_Action):
     code = "q"
-    help = "Match request with no response"
+    help = "匹配所有未响应的请求"
 
     @only(http.HTTPFlow, dns.DNSFlow)
     def __call__(self, f):
@@ -141,7 +141,7 @@ class FReq(_Action):
 
 class FResp(_Action):
     code = "s"
-    help = "Match response"
+    help = "匹配所有有返回值的请求"
 
     @only(http.HTTPFlow, dns.DNSFlow)
     def __call__(self, f):
@@ -150,7 +150,7 @@ class FResp(_Action):
 
 class FAll(_Action):
     code = "all"
-    help = "Match all flows"
+    help = "匹配全部请求"
 
     def __call__(self, f: flow.Flow):
         return True
@@ -397,7 +397,7 @@ class FUrl(_Rex):
 
 class FSrc(_Rex):
     code = "src"
-    help = "Match source address"
+    help = "匹配请求来源IP"
     is_binary = False
 
     def __call__(self, f):
@@ -409,7 +409,7 @@ class FSrc(_Rex):
 
 class FDst(_Rex):
     code = "dst"
-    help = "Match destination address"
+    help = "匹配目的地IP"
     is_binary = False
 
     def __call__(self, f):
@@ -421,7 +421,7 @@ class FDst(_Rex):
 
 class FReplay(_Action):
     code = "replay"
-    help = "Match replayed flows"
+    help = "匹配重复过的请求"
 
     def __call__(self, f):
         return f.is_replay is not None
@@ -429,7 +429,7 @@ class FReplay(_Action):
 
 class FReplayClient(_Action):
     code = "replayq"
-    help = "Match replayed client request"
+    help = "匹配劫持过的请求"
 
     def __call__(self, f):
         return f.is_replay == "request"
@@ -437,7 +437,7 @@ class FReplayClient(_Action):
 
 class FReplayServer(_Action):
     code = "replays"
-    help = "Match replayed server response"
+    help = "匹配劫持过响应内容的请求"
 
     def __call__(self, f):
         return f.is_replay == "response"
@@ -445,7 +445,7 @@ class FReplayServer(_Action):
 
 class FMeta(_Rex):
     code = "meta"
-    help = "Flow metadata"
+    help = "Flow metadata（暂不支持）"
     flags = re.MULTILINE
     is_binary = False
 

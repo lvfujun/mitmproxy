@@ -2064,9 +2064,9 @@ export default (function() {
     function body(regex){
         regex = new RegExp(regex, "i");
         function bodyFilter(flow){
-            return true;
+            return regex.test(flow.comment)
         }
-        bodyFilter.desc = "body filters 还没实现";
+        bodyFilter.desc = "body filters " + regex;
         return bodyFilter;
     }
 

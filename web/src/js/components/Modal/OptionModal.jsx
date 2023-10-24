@@ -84,6 +84,7 @@ class PureOptionModal extends Component {
                                         case 'allow_hosts':
                                         case 'block_list':
                                         case 'map_remote':
+                                        case 'map_local':
                                             hideModal = false
                                         default:
                                             break;

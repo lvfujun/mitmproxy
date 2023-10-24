@@ -4,7 +4,7 @@ from typing import Optional
 from mitmproxy import optmanager
 
 CONF_DIR = "~/.mitmproxy"
-CONF_BASENAME = "mitmproxy"
+CONF_BASENAME = "proxy"
 LISTEN_PORT = 8080
 CONTENT_VIEW_LINES_CUTOFF = 512
 KEY_SIZE = 2048
@@ -145,6 +145,24 @@ class Options(optmanager.OptManager):
             "ssl_insecure",
             bool,
             False,
+            "Do not verify upstream server SSL/TLS certificates.",
+        )
+        self.add_option(
+            "filter_body_content",
+            bool,
+            False,
+            "Do not verify upstream server SSL/TLS certificates.",
+        )
+        self.add_option(
+            "traffic_control",
+            bool,
+            False,
+            "Do not verify upstream server SSL/TLS certificates.",
+        )
+        self.add_option(
+            "traffic_control_json",
+            str,
+            '',
             "Do not verify upstream server SSL/TLS certificates.",
         )
         self.add_option(

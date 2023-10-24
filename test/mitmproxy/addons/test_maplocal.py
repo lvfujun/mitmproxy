@@ -136,7 +136,7 @@ class TestMapLocal:
             tctx.configure(ml, map_local=["/foo/bar/" + str(tmpdir)])
             with pytest.raises(Exception, match="Invalid regular expression"):
                 tctx.configure(ml, map_local=["/foo/+/" + str(tmpdir)])
-            with pytest.raises(Exception, match="Invalid file path"):
+            with pytest.raises(Exception, match="目标文件不存在"):
                 tctx.configure(ml, map_local=["/foo/.+/three"])
 
     def test_simple(self, tmpdir):

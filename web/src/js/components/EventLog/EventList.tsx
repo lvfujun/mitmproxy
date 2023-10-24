@@ -79,7 +79,6 @@ class EventLogList extends Component<EventLogListProps, EventLogListState> {
     render() {
         const { vScroll } = this.state
         const { events } = this.props
-
         return (
             <pre onScroll={this.onViewportUpdate}>
                 <div style={{ height: vScroll.paddingTop }}/>

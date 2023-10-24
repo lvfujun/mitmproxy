@@ -36,7 +36,9 @@ export async function pureSendUpdate(option: Option, value, dispatch) {
     try {
         const response = await fetchApi.put('/options', {[option]: value});
         if (response.status === 200) {
-            dispatch(optionsEditorActions.updateSuccess(option))
+            if (dispatch) {
+                dispatch(optionsEditorActions.updateSuccess(option))
+            }
         } else {
             throw await response.text()
         }
@@ -46,11 +48,33 @@ export async function pureSendUpdate(option: Option, value, dispatch) {
 }
 
 let sendUpdate = pureSendUpdate; // _.throttle(pureSendUpdate, 500, {leading: true, trailing: true})
-
+let delayTime = 1000; // 延迟时间
+let timerId: ReturnType<typeof setTimeout> | null = null;
 export function update(name: Option, value: any): AppThunk {
     return dispatch => {
         dispatch(optionsEditorActions.startUpdate(name, value))
-        sendUpdate(name, value, dispatch);
+        // 增加防抖节流
+        if (timerId) {
+            clearTimeout(timerId);
+        }
+        let list = ['allow_hosts', 'block_list', 'map_local', 'map_remote', 'modify_body', 'modify_headers']
+
+        if (list.includes(name)) {
+            timerId = setTimeout(function () {
+                sendUpdate(name, value, dispatch);
+            }, delayTime);
+        } else {
+            sendUpdate(name, value, dispatch);
+        }
+
+        if (name == "showhost") {
+            alert('📢注意：如果你使用的PAC代理模式，将不会立即生效（约1分钟左右生效），如果需要立即生效请重新开关一下被代理设备的代理设置，或者断开wifi重新链接，如果需要即时生效，请将被代理设备代理切换为普通代理模式')
+            if (value == true) {
+                sendUpdate("allow_hosts", ["api.cgyouxi.com", "japi.cgyouxi.com", "mxapi", "miniapi", "cgyouxi.com", "muccybook", "muccyapi", "wanman66", "dreamwanman", "wanmanqc", "qingchengwanman", "(.+?).66rpg.com"], null);
+            } else {
+                sendUpdate("allow_hosts", ["api.cgyouxi.com", "japi.cgyouxi.com", "mxapi", "miniapi", "c2.cgyouxi.com", "muccybook", "muccyapi", "wanman66", "dreamwanman", "wanmanqc", "qingchengwanman", "(.+?).66rpg.com"], null);
+            }
+        }
     }
 }
 
@@ -72,3 +96,4 @@ export function addInterceptFilter(example) {
         dispatch(update("intercept", intercept));
     }
 }
+

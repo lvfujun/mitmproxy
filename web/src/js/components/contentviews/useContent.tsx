@@ -6,6 +6,7 @@ export const SHOW_MAX_LINES = 80;
 export type ContentViewData = {
     lines: [style: string, text: string][][],
     description: string,
+    rawJson: string,
     from_client?: boolean
     timestamp?: number
 }

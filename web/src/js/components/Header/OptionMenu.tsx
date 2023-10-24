@@ -31,10 +31,10 @@ export default function OptionMenu() {
                             停用缓存（强刷每个请求） <DocsLink resource="overview-features/#anticache"/>
                         </OptionsToggle>
                         <OptionsToggle name="showhost">
-                            显示host
+                            抓取静态资源（图片、引擎资源等）
                         </OptionsToggle>
-                        <OptionsToggle name="ssl_insecure">
-                            不校验父级代理的证书
+                        <OptionsToggle name="filter_body_content">
+                            捕获接口响应（筛选用）
                         </OptionsToggle>
                     </div>
                     <div className="menu-legend">快速选项</div>

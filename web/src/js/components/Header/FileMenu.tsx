@@ -37,6 +37,11 @@ export default React.memo(function FileMenu() {
                 {/*        <i className="fa fa-fw fa-external-link"/>&nbsp;Install Certificates...*/}
                 {/*    </a>*/}
                 {/*</li>*/}
+                <li>
+                    <a href="https://ty-vs.66rpg.com/?folder=/data/ty" target="_blank">
+                        <i className="fa fa-fw fa-external-link"/>&nbsp;远程文件管理
+                    </a>
+                </li>
             </HideInStatic>
         </Dropdown>
     )

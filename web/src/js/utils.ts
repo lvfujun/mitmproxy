@@ -68,6 +68,7 @@ function getCookie(name) {
 const xsrf = getCookie("_xsrf");
 
 export function fetchApi(url: string, options: RequestInit = {}): Promise<Response> {
+    // console.trace(url)
     if (options.method && options.method !== "GET") {
         options.headers = options.headers || {};
         options.headers["X-XSRFToken"] = xsrf;

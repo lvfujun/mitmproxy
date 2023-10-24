@@ -8,7 +8,7 @@ export default function Footer() {
     const version = useAppSelector(state => state.conf.version);
     let {
         mode, intercept, showhost, upstream_cert, rawtcp, dns_server, http2, websocket, anticache, anticomp,
-        stickyauth, stickycookie, stream_large_bodies, listen_host, listen_port, server, ssl_insecure
+        stickyauth, stickycookie, stream_large_bodies, listen_host, listen_port, server, ssl_insecure, filter_body_content, traffic_control
     } = useAppSelector(state => state.options);
 
     return (
@@ -19,11 +19,14 @@ export default function Footer() {
             {intercept && (
                 <span className="label label-success">Intercept: {intercept}</span>
             )}
-            {ssl_insecure && (
-                <span className="label label-danger">ssl_insecure</span>
+            {filter_body_content && (
+                <span className="label label-danger">捕获接口响应（筛选用）</span>
+            )}
+            {traffic_control && (
+                <span className="label label-danger">弱网模拟</span>
             )}
             {showhost && (
-                <span className="label label-success">showhost</span>
+                <span className="label label-success">抓取静态资源</span>
             )}
             {!upstream_cert && (
                 <span className="label label-success">no-upstream-cert</span>
@@ -53,7 +56,7 @@ export default function Footer() {
                 <span className="label label-success">stickycookie: {stickycookie}</span>
             )}
             {stream_large_bodies && (
-                <span className="label label-success">stream: {formatSize(stream_large_bodies)}</span>
+                <span className="label label-success">stream: {stream_large_bodies}</span>
             )}
            <div className="pull-right">
                 <HideInStatic>
