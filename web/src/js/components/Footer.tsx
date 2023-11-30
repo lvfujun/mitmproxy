@@ -8,11 +8,11 @@ export default function Footer() {
     const version = useAppSelector(state => state.conf.version);
     let {
         mode, intercept, showhost, upstream_cert, rawtcp, dns_server, http2, websocket, anticache, anticomp,
-        stickyauth, stickycookie, stream_large_bodies, listen_host, listen_port, server, ssl_insecure, filter_body_content, traffic_control
+        stickyauth, stickycookie, stream_large_bodies, listen_host, listen_port, server, ssl_insecure, filter_body_content, performance_switch, traffic_control
     } = useAppSelector(state => state.options);
 
     return (
-        <footer>
+        <footer style={{"fontSize":16}}>
             {mode && mode !== "regular" && (
                 <span className="label label-success">{mode} mode</span>
             )}
@@ -57,6 +57,9 @@ export default function Footer() {
             )}
             {stream_large_bodies && (
                 <span className="label label-success">stream: {stream_large_bodies}</span>
+            )}
+            {performance_switch && (
+                <span className="label label-danger">性能分析中</span>
             )}
            <div className="pull-right">
                 <HideInStatic>

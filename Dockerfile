@@ -3,6 +3,7 @@ FROM python:3.9
 USER root
 ENV http_proxy=http://172.16.6.111:7890
 ENV https_proxy=http://172.16.6.111:7890
+ENV PYTHONOPTIMIZE=2
 VOLUME /certs
 VOLUME /script
 

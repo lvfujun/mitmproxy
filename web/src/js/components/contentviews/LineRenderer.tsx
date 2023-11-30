@@ -32,9 +32,17 @@ function b64_to_utf8(str: string): string {
 }
 
 function FrameWrapper(rawJson: string) {
-    const ref: RefObject<HTMLIFrameElement> = React.useRef(null);
+const ref: RefObject<HTMLIFrameElement> = React.useRef(null);
     const [height, setHeight] = React.useState("0px");
 
+    useEffect(() => {
+        // 监听来自 iframe 的消息
+        window.addEventListener("message", (event) => {
+            if (typeof event.data === 'object' && event.data.frameHeight) {
+                setHeight(`${event.data.frameHeight+100}px`);
+            }
+        }, false);
+    }, []);
     // Declare a state variable to hold the focused element before iframe load
     const [focusedElementBeforeIframeLoaded, setFocusedElementBeforeIframeLoaded] = React.useState<Element | null>(null);
 
@@ -44,29 +52,6 @@ function FrameWrapper(rawJson: string) {
     }, []);
 
     const onLoad = () => {
-        let height = 0;
-        let count = 0;
-        const timer = setInterval(function () {
-            count++;
-            if (count > 1000) {
-                clearInterval(timer)
-                return;
-            }
-            try {
-                const jfContentHeight = ref.current?.contentWindow?.document.getElementById("jfContent")?.offsetHeight;
-                if (jfContentHeight == 0) {
-                    return;
-                }
-                const safeJfContentHeight = jfContentHeight || 0;
-                if (height != safeJfContentHeight + 100) {
-                    height = safeJfContentHeight + 100
-                    setHeight(height + "px");
-                }
-            } catch (e) {
-                clearInterval(timer)
-            }
-        }, 25)
-
         // Return focus to the previously focused element
         if (focusedElementBeforeIframeLoaded) {
             (focusedElementBeforeIframeLoaded as HTMLElement).focus();
@@ -80,7 +65,7 @@ function FrameWrapper(rawJson: string) {
             ref={ref}
             onLoad={onLoad}
             id="myFrame"
-            src={"/json-format?my_json=1"}
+            src={"/json-format?my_json=1&v=2"}
             width="100%"
             height={height}
             scrolling="no"

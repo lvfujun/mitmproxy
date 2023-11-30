@@ -154,15 +154,15 @@ class Options(optmanager.OptManager):
             "Do not verify upstream server SSL/TLS certificates.",
         )
         self.add_option(
+            "performance_switch",
+            bool,
+            False,
+            "性能分析",
+        )
+        self.add_option(
             "traffic_control",
             bool,
             False,
-            "Do not verify upstream server SSL/TLS certificates.",
-        )
-        self.add_option(
-            "traffic_control_json",
-            str,
-            '',
             "Do not verify upstream server SSL/TLS certificates.",
         )
         self.add_option(

@@ -57,7 +57,7 @@ export function update(name: Option, value: any): AppThunk {
         if (timerId) {
             clearTimeout(timerId);
         }
-        let list = ['allow_hosts', 'block_list', 'map_local', 'map_remote', 'modify_body', 'modify_headers']
+        let list = ['allow_hosts', 'block_list', 'map_local', 'map_remote', 'modify_body', 'modify_headers', 'performance_switch']
 
         if (list.includes(name)) {
             timerId = setTimeout(function () {

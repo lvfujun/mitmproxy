@@ -60,6 +60,16 @@ class Log:
         """
         self(txt, "error")
 
+    def performance(self, txt):
+        """
+        Collect, analyze and print network performance data.
+        """
+        # Your code goes here
+        # Collect performance data
+        # Analyze performance data
+        # Print or log performance data
+        self(txt, "performance")
+
     def __call__(self, text, level="info"):
         self.master.event_loop.call_soon_threadsafe(
             self.master.addons.trigger,
@@ -84,8 +94,9 @@ LogTierOrder = [
     "info",
     "alert",
     "debug",
+    "performance"
 ]
 
 
 def log_tier(level):
-    return dict(error=0, warn=1, info=2, alert=2, debug=3).get(level)
+    return dict(error=0, warn=1, info=2, alert=2, debug=3, performance=4).get(level)

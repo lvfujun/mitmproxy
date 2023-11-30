@@ -1,10 +1,12 @@
 #!/bin/bash
 ls -lsh /certs/
 cat /certs/66cgyouxi.pem
+cat /etc/main_hosts >> /etc/hosts
 CMD="mitmweb \
      --certs *.66rpg.com=/certs/66cgyouxi.pem \
      --certs *.cgyouxi.com=/certs/66cgyouxi.pem \
      --certs *.muccybook.com=/certs/muxi.pem \
+     --certs *.muccygame.com=/certs/muccygame.pem \
      --certs *.muccyapi.com=/certs/muccyapi.pem \
      --certs *.dreamwanman.com=/certs/dreamwanman.pem \
      --certs muccybook.com=/certs/muxi.pem \
@@ -20,6 +22,7 @@ CMD="mitmweb \
      --allow-hosts c2.cgyouxi.com \
      --allow-hosts muccyapi \
      --allow-hosts muccybook \
+     --allow-hosts muccygame \
      --allow-hosts wanman66 \
      --allow-hosts dreamwanman \
      --allow-hosts wanmanqc \

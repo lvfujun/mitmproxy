@@ -31,6 +31,16 @@ class TrafficControl:
 
     # 根据 JSON 配置文件配置网络特性
     def configure(self, config):
+        config = {
+            'bandwidth': {
+                'up': config['uplinkBandwidth'],
+                'down': config['downlinkBandwidth']
+            },
+            'latency': config['networkDelay'],
+            'mtu': config['mtu'],
+            'packet_loss': config['packetLossRate'],
+            'unrestricted_ports': config['unrestrictedPorts']
+        }
         self.remove()
         if 'bandwidth' in config:
             self.set_bandwidth(config['bandwidth'], config.get('unrestricted_ports', []))

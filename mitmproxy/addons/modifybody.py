@@ -1,8 +1,10 @@
+import json
 import re
 from collections.abc import Sequence
 
 from mitmproxy import ctx, exceptions
 from mitmproxy.addons.modifyheaders import parse_modify_spec, ModifySpec
+from mitmproxy.utils.strutils import escaped_str_to_bytes
 
 
 class ModifyBody:
@@ -53,14 +55,36 @@ class ModifyBody:
                 except OSError as e:
                     ctx.log.warn(f"Could not read replacement file: {e}")
                     continue
+
                 if flow.response:
-                    flow.response.content = re.sub(
+                    content = flow.response.content
+
+                    # 执行原来的替换逻辑
+                    content = re.sub(
                         spec.subject,
                         replacement,
-                        flow.response.content,
+                        content,
                         flags=re.DOTALL,
                     )
+
+                    # 先将 subject 和 replacement 转换为 UTF-8 编码的字符串
+                    subject_str = spec.subject.decode('utf-8')
+                    replacement_str = replacement.decode('utf-8')
+                    # 处理 Unicode 转义格式（例如 \uxxx）
+                    unicode_escape_subject = json.dumps(subject_str)[1:-1]  # remove double quotes
+                    unicode_escape_replacement = json.dumps(replacement_str)[1:-1]  # remove double quotes
+
+                    unicode_escape_subject_bytes = escaped_str_to_bytes(unicode_escape_subject)
+                    unicode_escape_replacement_bytes = escaped_str_to_bytes(unicode_escape_replacement)
+                    if unicode_escape_subject_bytes in content:
+                        ctx.log.info(
+                            f"在响应内容中，将 {subject_str} 替换为 {replacement_str}。URL: {flow.request.url}")
+                        content = content.replace(unicode_escape_subject_bytes, unicode_escape_replacement_bytes)
+                    # else:
+                    #     ctx.log.info(f"在响应内容中未找到 {subject_str}。URL: {flow.request.url}")
+                    flow.response.content = content
                 else:
+                    # 对请求内容进行类似的替换，如果需要的话
                     flow.request.content = re.sub(
                         spec.subject, replacement, flow.request.content, flags=re.DOTALL
                     )

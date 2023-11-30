@@ -65,8 +65,8 @@ export interface OptionsState {
     showhost: boolean
     ssl_insecure: boolean
     filter_body_content: boolean,
+    performance_switch: boolean,
     traffic_control: boolean,
-    traffic_control_json: string,
     ssl_verify_upstream_trusted_ca: string | undefined
     ssl_verify_upstream_trusted_confdir: string | undefined
     stickyauth: string | undefined
@@ -161,8 +161,8 @@ export const defaultState: OptionsState = {
     showhost: false,
     ssl_insecure: false,
     filter_body_content: false,
+    performance_switch: false,
     traffic_control: false,
-    traffic_control_json: '',
     ssl_verify_upstream_trusted_ca: undefined,
     ssl_verify_upstream_trusted_confdir: undefined,
     stickyauth: undefined,

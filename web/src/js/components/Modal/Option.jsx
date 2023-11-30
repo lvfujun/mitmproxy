@@ -96,7 +96,10 @@ StringSequenceOption.propTypes = {
 }
 
 function StringSequenceOption({value, onChange, ...props}) {
-    const height = Math.max(value.length, 1)
+    let height = Math.max(value.length, 1)
+    if (height === 1) {
+        height = 4;
+    }
     return <textarea
         rows={height}
         value={value.join('\n')}
@@ -126,7 +129,6 @@ function PureOption({choices, type, value, onChange, name, error}) {
     if (Opt !== BooleanOption) {
         props.className = "form-control"
     }
-
     return <div className={classnames({'has-error': error})}>
         <Opt
             name={name}

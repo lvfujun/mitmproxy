@@ -654,6 +654,7 @@ class TrafficHandler(RequestHandler):
 
         elif action == 'remove':
             try:
+                print("流量控制规则已成功移除")
                 TrafficControl().remove()
                 self.write("流量控制规则已成功移除")
             except Exception as e:

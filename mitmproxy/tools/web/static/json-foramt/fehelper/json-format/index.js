@@ -1,3 +1,4 @@
+
 let editor = {}
     , LOCAL_KEY_OF_LAYOUT = "local-layout-key"
     , JSON_LINT = "jsonformat:json-lint-switch"
@@ -186,3 +187,18 @@ new Vue({
         }
     }
 });
+// 在需要观察的元素上创建一个新的 ResizeObserver 实例
+// 将调整后的高度通过 postMessage 发送出去
+const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        window.parent.postMessage({
+            frameHeight: entry.contentRect.height
+        }, '*');
+    }
+});
+
+// 开始观察 "#jfContent" 元素
+const observedElement = document.getElementById("jfContent");
+if (observedElement) {
+    resizeObserver.observe(observedElement);
+}

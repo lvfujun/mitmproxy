@@ -109,7 +109,8 @@ export const testState: RootState = {
             info: true,
             web: false,
             warn: true,
-            error: true
+            error: true,
+            performance:true
         },
         view: [
             {id: "1", level: 'info', message: 'foo'},

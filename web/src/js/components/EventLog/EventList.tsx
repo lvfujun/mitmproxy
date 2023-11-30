@@ -99,7 +99,8 @@ function LogIcon({ event }) {
       web: 'html5',
       debug: 'bug',
       warn: 'exclamation-triangle',
-      error: 'ban'
+      error: 'ban',
+        performance:'globe'
     }[event.level] || 'info'
     return <i className={`fa fa-fw fa-${icon}`}/>
 }
