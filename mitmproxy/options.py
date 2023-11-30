@@ -4,7 +4,8 @@ from typing import Optional
 from mitmproxy import optmanager
 
 CONF_DIR = "~/.mitmproxy"
-CONF_BASENAME = "mitmproxy"
+CONF_BASENAME = "proxy"
+LISTEN_PORT = 8080
 CONTENT_VIEW_LINES_CUTOFF = 512
 KEY_SIZE = 2048
 
@@ -89,12 +90,9 @@ class Options(optmanager.OptManager):
             regular expression and matched on the ip or the hostname.
             """,
         )
-        self.add_option("allow_hosts", Sequence[str], [], "Opposite of --ignore-hosts.")
-        self.add_option("listen_host", str, "",
-                        "Address to bind proxy server(s) to (may be overridden for individual modes, see `mode`).")
-        self.add_option("listen_port", Optional[int], None,
-                        "Port to bind proxy server(s) to (may be overridden for individual modes, see `mode`). "
-                        "By default, the port is mode-specific. The default regular HTTP proxy spawns on port 8080.")
+        self.add_option("allow_hosts", Sequence[str], [], "这个选项的作用是用来控制你想抓包的域名/ip")
+        self.add_option("listen_host", str, "", "Address to bind proxy to.")
+        self.add_option("listen_port", int, LISTEN_PORT, "Proxy service port.")
         self.add_option(
             "mode",
             Sequence[str],
@@ -122,7 +120,8 @@ class Options(optmanager.OptManager):
             "http2",
             bool,
             True,
-            "Enable/disable HTTP/2 support. " "HTTP/2 support is enabled by default.",
+            "开启/关闭 HTTP/2 支持. "
+            "HTTP/2 默认开启，如果遇到引擎加载失败请关闭此项.",
         )
         self.add_option(
             "http2_ping_keepalive",
@@ -157,6 +156,24 @@ class Options(optmanager.OptManager):
         )
         self.add_option(
             "ssl_insecure",
+            bool,
+            False,
+            "Do not verify upstream server SSL/TLS certificates.",
+        )
+        self.add_option(
+            "filter_body_content",
+            bool,
+            False,
+            "Do not verify upstream server SSL/TLS certificates.",
+        )
+        self.add_option(
+            "performance_switch",
+            bool,
+            False,
+            "性能分析",
+        )
+        self.add_option(
+            "traffic_control",
             bool,
             False,
             "Do not verify upstream server SSL/TLS certificates.",

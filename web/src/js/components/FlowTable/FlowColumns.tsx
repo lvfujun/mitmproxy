@@ -101,7 +101,7 @@ export const path: FlowColumn = ({flow}) => {
                 <i className="fa fa-fw fa-pause pull-right"/>
             )}
             {err}
-            <span className="marker pull-right">{flow.marked}</span>
+            <span className="marker pull-right">&nbsp; {flow.marked} &nbsp;</span>
             {mainPath(flow)}
         </td>
     )
@@ -141,7 +141,7 @@ export const status: FlowColumn = ({flow}) => {
         <td className="col-status" style={{color: color}}>{status.sortKey(flow)}</td>
     )
 }
-status.headerName = 'Status'
+status.headerName = '状态码'
 status.sortKey = flow => {
     switch (flow.type) {
         case "http": return flow.response?.status_code
@@ -155,7 +155,7 @@ export const size: FlowColumn = ({flow}) => {
         <td className="col-size">{formatSize(getTotalSize(flow))}</td>
     )
 };
-size.headerName = 'Size'
+size.headerName = '大小'
 size.sortKey = flow => getTotalSize(flow)
 
 
@@ -171,7 +171,7 @@ export const time: FlowColumn = ({flow}) => {
         </td>
     )
 }
-time.headerName = 'Time'
+time.headerName = '耗时'
 time.sortKey = flow => {
     const start = startTime(flow), end = endTime(flow);
     return start && end && end - start;
@@ -182,14 +182,14 @@ export const timestamp: FlowColumn = ({flow}) => {
     return (
         <td className="col-timestamp">
             {start ? (
-                formatTimeStamp(start)
+                formatTimeStamp(start+3600*8).substring(0, 19)
             ) : (
                 '...'
             )}
         </td>
     )
 }
-timestamp.headerName = 'Start time'
+timestamp.headerName = '请求时间'
 timestamp.sortKey = flow => startTime(flow)
 
 const markers = {
@@ -201,6 +201,22 @@ const markers = {
     ":purple_circle:": "🟣",
     ":brown_circle:": "🟤",
 }
+export const protocol: FlowColumn = ({flow}) => {
+    return (
+        <td className="col-method">{flow.type === "http" ? flow.response?.http_version : flow.type.toUpperCase()}</td>
+    )
+};
+protocol.headerName = '协议'
+protocol.sortKey = flow => flow.type === "http" ? flow.response?.http_version : flow.type.toUpperCase()
+
+export const reqId: FlowColumn = ({flow}) => {
+    return (
+        <td className="col-method">{flow.incId}</td>
+    )
+};
+
+reqId.headerName = 'ID'
+reqId.sortKey = flow => flow.incId
 
 export const quickactions: FlowColumn = ({flow}) => {
     const dispatch = useDispatch()
@@ -236,5 +252,7 @@ export default {
     status,
     time,
     timestamp,
-    tls
+    tls,
+    reqId,
+    protocol,
 };

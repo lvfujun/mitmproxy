@@ -173,6 +173,15 @@ class Log:
             stacklevel=2,
         )
         logging.getLogger().error(txt)
+    def performance(self, txt):
+        """
+        Collect, analyze and print network performance data.
+        """
+        # Your code goes here
+        # Collect performance data
+        # Analyze performance data
+        # Print or log performance data
+        self(txt, "performance")
 
     def __call__(self, text, level="info"):
         warnings.warn(

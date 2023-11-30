@@ -131,7 +131,7 @@ class TestModifyHeadersFile:
         mh = ModifyHeaders()
         with taddons.context(mh) as tctx:
             with pytest.raises(
-                Exception, match="Cannot parse modify_headers .* Invalid file path"
+                Exception, match="Cannot parse modify_headers .* 目标文件不存在"
             ):
                 tctx.configure(mh, modify_headers=["/~q/foo/@nonexistent"])
 

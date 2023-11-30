@@ -79,7 +79,6 @@ class EventLogList extends Component<EventLogListProps, EventLogListState> {
     render() {
         const { vScroll } = this.state
         const { events } = this.props
-
         return (
             <pre onScroll={this.onViewportUpdate}>
                 <div style={{ height: vScroll.paddingTop }}/>
@@ -100,7 +99,8 @@ function LogIcon({ event }) {
       web: 'html5',
       debug: 'bug',
       warn: 'exclamation-triangle',
-      error: 'ban'
+      error: 'ban',
+        performance:'globe'
     }[event.level] || 'info'
     return <i className={`fa fa-fw fa-${icon}`}/>
 }

@@ -29,7 +29,7 @@ def parse_map_local_spec(option: str) -> MapLocalSpec:
     try:
         path = Path(replacement).expanduser().resolve(strict=True)
     except FileNotFoundError as e:
-        raise ValueError(f"Invalid file path: {replacement} ({e})")
+        raise ValueError(f"目标文件不存在: {replacement} ({e})")
 
     return MapLocalSpec(filter, regex, path)
 
@@ -85,9 +85,10 @@ class MapLocal:
             Sequence[str],
             [],
             """
-            Map remote resources to a local file using a pattern of the form
-            "[/flow-filter]/url-regex/file-or-directory-path", where the
-            separator can be any character.
+            使用local模式将远程资源映射到本地文件
+            "[/flow filter]/url regex/file或目录路径",例1：|xx.jpg|/data/ty/yunhe/xx.jpg,例2：|c2.cgyouxi.com/xx.jpg|/data/ty/yunhe/xx.jpg 多条规则请换行，其中|
+            分隔符可以是任何字符。\n
+            详细使用教程：http://wiki.66rpg.com/pages/viewpage.action?pageId=88703028
             """,
         )
 

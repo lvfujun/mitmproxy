@@ -75,18 +75,35 @@ class PureOptionModal extends Component {
                 <div className="modal-body">
                     <div className="form-horizontal">
                         {
-                            options.map(name =>
-                                <div key={name} className="form-group">
-                                    <div className="col-xs-6">
-                                        <label htmlFor={name}>{name}</label>
-                                        <OptionHelp name={name}/>
-                                    </div>
-                                    <div className="col-xs-6">
-                                        <Option name={name}/>
-                                        <OptionError name={name}/>
-                                        <OptionDefault name={name}/>
-                                    </div>
-                                </div>
+                            options.map(name => {
+                                    let hideModal = true
+                                    switch (name) {
+                                        case 'http2':
+                                        case 'modify_body':
+                                        case 'modify_headers':
+                                        case 'allow_hosts':
+                                        case 'block_list':
+                                        case 'map_remote':
+                                        case 'performance_switch':
+                                        case 'map_local':
+                                            hideModal = false
+                                        default:
+                                            break;
+                                    }
+                                    return (
+                                        <div key={name} className={hideModal == true ? 'form-group hidden' : 'form-group'}>
+                                            <div className="col-xs-6">
+                                                <label htmlFor={name}>{name}</label>
+                                                <OptionHelp name={name}/>
+                                            </div>
+                                            <div className="col-xs-6">
+                                                <Option name={name}/>
+                                                <OptionError name={name}/>
+                                                <OptionDefault name={name}/>
+                                            </div>
+                                        </div>
+                                    )
+                                }
                             )
                         }
                     </div>

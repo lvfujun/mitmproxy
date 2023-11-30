@@ -3,7 +3,7 @@ import subprocess
 import sys
 
 VERSION = "9.0.1"
-MITMPROXY = "mitmproxy " + VERSION
+MITMPROXY = "ty-proxy " + VERSION
 
 # Serialization format version. This is displayed nowhere, it just needs to be incremented by one
 # for each change in the file format.

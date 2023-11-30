@@ -38,7 +38,9 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
     }
 
     UNSAFE_componentWillReceiveProps(nextProps) {
-        this.setState({value: nextProps.value})
+        if (!this.state.focus) {
+            this.setState({value: nextProps.value});
+        }
     }
 
     isValid(filt) {
@@ -114,6 +116,7 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
     render() {
         const {type, color, placeholder} = this.props
         const {value, focus, mousefocus} = this.state
+
         return (
             <div className={classnames('filter-input input-group', {'has-error': !this.isValid(value)})}>
                 <span className="input-group-addon">

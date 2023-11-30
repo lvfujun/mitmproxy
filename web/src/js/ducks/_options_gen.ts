@@ -62,6 +62,9 @@ export interface OptionsState {
     server_replay_use_headers: string[]
     showhost: boolean
     ssl_insecure: boolean
+    filter_body_content: boolean,
+    performance_switch: boolean,
+    traffic_control: boolean,
     ssl_verify_upstream_trusted_ca: string | undefined
     ssl_verify_upstream_trusted_confdir: string | undefined
     stickyauth: string | undefined
@@ -93,7 +96,7 @@ export type Option = keyof OptionsState
 
 export const defaultState: OptionsState = {
     add_upstream_certs_to_client_chain: false,
-    allow_hosts: [],
+    allow_hosts: ['xxx'],
     anticache: false,
     anticomp: false,
     block_global: true,
@@ -154,6 +157,9 @@ export const defaultState: OptionsState = {
     server_replay_use_headers: [],
     showhost: false,
     ssl_insecure: false,
+    filter_body_content: false,
+    performance_switch: false,
+    traffic_control: false,
     ssl_verify_upstream_trusted_ca: undefined,
     ssl_verify_upstream_trusted_confdir: undefined,
     stickyauth: undefined,
@@ -172,7 +178,7 @@ export const defaultState: OptionsState = {
     view_filter: undefined,
     view_order: "time",
     view_order_reversed: false,
-    web_columns: ["tls", "icon", "path", "method", "status", "size", "time"],
+    web_columns: ["tls", "icon", "path", "method", "status", "size", "time", "timestamp"],
     web_debug: false,
     web_host: "127.0.0.1",
     web_open_browser: true,

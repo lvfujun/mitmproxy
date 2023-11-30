@@ -6,7 +6,7 @@ import Button from "../common/Button"
 import {update as updateOptions} from "../../ducks/options";
 import {useAppDispatch, useAppSelector} from "../../ducks";
 
-StartMenu.title = "Start"
+StartMenu.title = "搜索/拦截"
 
 export default function StartMenu() {
     return (
@@ -24,7 +24,7 @@ export default function StartMenu() {
                     <InterceptInput/>
                     <ResumeAll/>
                 </div>
-                <div className="menu-legend">Intercept</div>
+                <div className="menu-legend">请求拦截</div>
             </div>
         </div>
     )
@@ -35,7 +35,7 @@ function InterceptInput() {
         value = useAppSelector(state => state.options.intercept)
     return <FilterInput
         value={value || ""}
-        placeholder="Intercept"
+        placeholder="劫持请求"
         type="pause"
         color='hsl(208, 56%, 53%)'
         onChange={val => dispatch(updateOptions("intercept", val))}
@@ -47,7 +47,7 @@ function FlowFilterInput() {
         value = useAppSelector(state => state.flows.filter)
     return <FilterInput
         value={value || ""}
-        placeholder="Search"
+        placeholder="过滤请求"
         type="search"
         color='black'
         onChange={value => dispatch(setFilter(value))}
@@ -59,7 +59,7 @@ function HighlightInput() {
         value = useAppSelector(state => state.flows.highlight)
     return <FilterInput
         value={value || ""}
-        placeholder="Highlight"
+        placeholder="高亮请求"
         type="tag"
         color='hsl(48, 100%, 50%)'
         onChange={value => dispatch(setHighlight(value))}

@@ -9,6 +9,8 @@ export default Component => Object.assign(class AutoScrollWrapper extends Compon
     static displayName = Component.name;
 
     UNSAFE_componentWillUpdate() {
+                console.log('UNSAFE_componentWillUpdate')
+
         const viewport = ReactDOM.findDOMNode(this);
         this[symShouldStick] = viewport.scrollTop && isAtBottom(viewport);
         super.UNSAFE_componentWillUpdate && super.UNSAFE_componentWillUpdate();
@@ -16,6 +18,7 @@ export default Component => Object.assign(class AutoScrollWrapper extends Compon
     }
 
     componentDidUpdate() {
+        console.log('componentDidUpdate')
         const viewport = ReactDOM.findDOMNode(this);
         if (this[symShouldStick] && !isAtBottom(viewport)) {
             viewport.scrollTop = viewport.scrollHeight;

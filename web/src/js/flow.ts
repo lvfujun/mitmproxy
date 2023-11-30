@@ -2,6 +2,7 @@
 Type definitions for flows. Sync with mitmproxy/tools/web/app.py.
  */
 interface _Flow {
+    incId: number,
     id: string
     intercepted: boolean
     is_replay: "request" | "response" | undefined

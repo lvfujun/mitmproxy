@@ -30,7 +30,7 @@ export interface FlowsState extends store.State<Flow> {
 export const defaultState: FlowsState = {
     highlight: undefined,
     filter: undefined,
-    sort: {column: undefined, desc: false},
+    sort: {column: "reqId", desc: true},
     selected: [],
     ...store.defaultState
 }

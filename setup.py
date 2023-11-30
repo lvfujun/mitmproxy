@@ -98,6 +98,8 @@ setup(
         "publicsuffix2>=2.20190812,<3",
         "zstandard>=0.11,<0.20",
         "typing-extensions>=4.3,<4.5; python_version<'3.10'",
+        "werkzeug>=2.3.7,<3",
+        "piexif>=1.1.3, <1"
     ],
     extras_require={
         ':sys_platform == "win32"': [

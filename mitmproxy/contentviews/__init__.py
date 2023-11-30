@@ -11,6 +11,7 @@ Thus, the View API is very minimalistic. The only arguments are `data` and
 metadata depend on the protocol in use. Known attributes can be found in
 `base.View`.
 """
+import re
 import traceback
 from typing import Union
 from typing import Optional

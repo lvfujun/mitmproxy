@@ -56,7 +56,7 @@ export class PureEventLog extends Component {
                 <div onMouseDown={this.onDragStart}>
                     Eventlog
                     <div className="pull-right">
-                        {['debug', 'info', 'web', 'warn', 'error'].map(type => (
+                        {['performance', 'debug', 'info', 'web', 'warn', 'error'].map(type => (
                             <ToggleButton key={type} text={type} checked={filters[type]} onToggle={() => toggleFilter(type)}/>
                         ))}
                         <i onClick={close} className="fa fa-close"></i>

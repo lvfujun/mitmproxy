@@ -29,6 +29,7 @@ class TestParsing:
         assert flowfilter.parse("~replayq")
         assert flowfilter.parse("~replays")
         assert flowfilter.parse("~comment .")
+        assert flowfilter.parse("~f 1")
         p = flowfilter.parse("~q ~c 10")
         self._dump(p)
         assert len(p.lst) == 2
@@ -791,6 +792,7 @@ class TestMatchingDummyFlow:
         assert not self.q("~q", f)
 
         assert not self.q("~comment .", f)
+        assert not self.q("~f .", f)
         f.comment = "comment"
         assert self.q("~comment .", f)
 

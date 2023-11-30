@@ -16,7 +16,7 @@ import Dropdown, {MenuItem} from "../common/Dropdown";
 import {copy} from "../../flow/export";
 import {Flow} from "../../flow";
 
-FlowMenu.title = 'Flow'
+FlowMenu.title = '请求列表'
 
 export default function FlowMenu(): JSX.Element {
     const dispatch = useAppDispatch(),
@@ -33,11 +33,11 @@ export default function FlowMenu(): JSX.Element {
                                 onClick={() => dispatch(replayFlow(flow))}
                                 disabled={!canReplay(flow)}
                         >
-                            Replay
+                            重放请求
                         </Button>
                         <Button title="[D]uplicate flow" icon="fa-copy text-info"
                                 onClick={() => dispatch(duplicateFlow(flow))}>
-                            Duplicate
+                            克隆请求
                         </Button>
                         <Button disabled={!flow || !flow.modified} title="revert changes to flow [V]"
                                 icon="fa-history text-warning" onClick={() => dispatch(revertFlow(flow))}>
@@ -49,7 +49,7 @@ export default function FlowMenu(): JSX.Element {
                         </Button>
                         <MarkButton flow={flow}/>
                     </div>
-                    <div className="menu-legend">Flow Modification</div>
+                    <div className="menu-legend">控制请求流</div>
                 </div>
             </HideInStatic>
 
@@ -58,7 +58,7 @@ export default function FlowMenu(): JSX.Element {
                     <DownloadButton flow={flow}/>
                     <ExportButton flow={flow}/>
                 </div>
-                <div className="menu-legend">Export</div>
+                <div className="menu-legend">复制为</div>
             </div>
 
             <HideInStatic>
@@ -66,14 +66,14 @@ export default function FlowMenu(): JSX.Element {
                     <div className="menu-content">
                         <Button disabled={!flow || !flow.intercepted} title="[a]ccept intercepted flow"
                                 icon="fa-play text-success" onClick={() => dispatch(resumeFlow(flow))}>
-                            Resume
+                            继续
                         </Button>
                         <Button disabled={!flow || !flow.intercepted} title="kill intercepted flow [x]"
                                 icon="fa-times text-danger" onClick={() => dispatch(killFlow(flow))}>
-                            Abort
+                            终止
                         </Button>
                     </div>
-                    <div className="menu-legend">Interception</div>
+                    <div className="menu-legend">请求拦截/修改</div>
                 </div>
             </HideInStatic>
         </div>
@@ -120,7 +120,7 @@ function DownloadButton({flow}: { flow: Flow }) {
 function ExportButton({flow}: { flow: Flow }) {
     return <Dropdown className="" text={
         <Button title="Export flow." icon="fa-clone" onClick={() => 1}
-                disabled={flow.type !== "http"}>Export▾</Button>
+                disabled={flow.type !== "http"}>复制为▾</Button>
     } options={{"placement": "bottom-start"}}>
         <MenuItem onClick={() => copy(flow, "raw_request")}>Copy raw request</MenuItem>
         <MenuItem onClick={() => copy(flow, "raw_response")}>Copy raw response</MenuItem>
@@ -140,19 +140,27 @@ const markers = {
     ":purple_circle:": "🟣",
     ":brown_circle:": "🟤",
 }
-
+const markersZh = {
+    ":red_circle:": "红色",
+    ":orange_circle:": "橙色",
+    ":yellow_circle:": "黄色",
+    ":green_circle:": "绿色",
+    ":large_blue_circle:": "蓝色",
+    ":purple_circle:": "紫色",
+    ":brown_circle:": "褐色",
+}
 function MarkButton({flow}: { flow: Flow }) {
     const dispatch = useAppDispatch();
     return <Dropdown className="" text={
-        <Button title="mark flow" icon="fa-paint-brush text-success" onClick={() => 1}>Mark▾</Button>
+        <Button title="mark flow" icon="fa-paint-brush text-success" onClick={() => 1}>标记▾</Button>
     } options={{"placement": "bottom-start"}}>
-        <MenuItem onClick={() => dispatch(flowActions.update(flow, {marked: ""}))}>⚪ (no
+        <MenuItem onClick={() => dispatch(flowActions.update(flow, {marked: ""}))}>⚪ &nbsp;(no
             marker)</MenuItem>
         {Object.entries(markers).map(([name, sym]) =>
             <MenuItem
                 key={name}
                 onClick={() => dispatch(flowActions.update(flow, {marked: name}))}>
-                {sym} {name.replace(/[:_]/g, " ")}
+                {sym} &nbsp;{markersZh[name].replace(/[:_]/g, " ")}
             </MenuItem>
         )}
     </Dropdown>

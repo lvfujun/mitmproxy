@@ -33,9 +33,12 @@ class MapRemote:
             Sequence[str],
             [],
             """
-            Map remote resources to another remote URL using a pattern of the form
-            "[/flow-filter]/url-regex/replacement", where the separator can
-            be any character.
+            使用拦截模式将远程资源映射到另一个远程URL
+            
+            
+            "|指定接口[可选]|www.66rpg.com/ajax|v1-debug-www.66rpg.com/ajax" 支持正则，多个规则请使用换行。
+            详细使用教程：
+            http://wiki.66rpg.com/pages/viewpage.action?pageId=88703022
             """,
         )
 

@@ -45,7 +45,7 @@ def parse_modify_spec(option: str, subject_is_regex: bool) -> ModifySpec:
     try:
         spec.read_replacement()
     except OSError as e:
-        raise ValueError(f"Invalid file path: {replacement[1:]} ({e})")
+        raise ValueError(f"目标文件不存在: {replacement[1:]} ({e})")
 
     return spec
 
@@ -60,9 +60,10 @@ class ModifyHeaders:
             Sequence[str],
             [],
             """
-            Header modify pattern of the form "[/flow-filter]/header-name/[@]header-value", where the
-            separator can be any character. The @ allows to provide a file path that is used to read
-            the header value string. An empty header-value removes existing header-name headers.
+            替换响应头
+            例1：/REQUEST-ID/11111111
+            例2：/get_index_game_list/REQUEST-ID/11111111
+            例3：/\/ajax/([game|user])/REQUEST-ID/11111111
             """,
         )
 

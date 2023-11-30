@@ -38,7 +38,7 @@ export default function HttpMessage({flow, message}: HttpMessageProps) {
             try {
                 return JSON.parse(content)
             } catch (e) {
-                const err: ContentViewData = {"description": "Network Error", lines: [[["error", `${content}`]]]};
+                const err: ContentViewData = {rawJson: "", "description": "Network Error", lines: [[["error", `${content}`]]]};
                 return err;
             }
         } else {
@@ -84,6 +84,8 @@ export default function HttpMessage({flow, message}: HttpMessageProps) {
                 </div>
                 {ViewImage.matches(message) && <ViewImage flow={flow} message={message}/>}
                 <LineRenderer lines={contentViewData?.lines || []}
+                              rawJson={contentViewData?.rawJson || ""}
+                              description={contentViewData?.description || ""}
                               maxLines={maxLines}
                               showMore={showMore}/>
             </div>

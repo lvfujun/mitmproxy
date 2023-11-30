@@ -149,4 +149,4 @@ export default function Connection({flow}: { flow: Flow }) {
         </section>
     )
 }
-Connection.displayName = "Connection"
+Connection.displayName = "连接详情"

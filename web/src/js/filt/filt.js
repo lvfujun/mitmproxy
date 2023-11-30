@@ -2082,9 +2082,9 @@ export default (function() {
     function body(regex){
         regex = new RegExp(regex, "i");
         function bodyFilter(flow){
-            return true;
+            return regex.test(flow.comment)
         }
-        bodyFilter.desc = "body filters are not implemented yet, see https://github.com/mitmproxy/mitmweb/issues/10";
+        bodyFilter.desc = "body filters " + regex;
         return bodyFilter;
     }
 
@@ -2094,7 +2094,7 @@ export default (function() {
         function requestBodyFilter(flow){
             return true;
         }
-        requestBodyFilter.desc = "body filters are not implemented yet, see https://github.com/mitmproxy/mitmweb/issues/10";
+        requestBodyFilter.desc = "body filters 还没实现";
         return requestBodyFilter;
     }
 
@@ -2104,7 +2104,7 @@ export default (function() {
         function responseBodyFilter(flow){
             return true;
         }
-        responseBodyFilter.desc = "body filters are not implemented yet, see https://github.com/mitmproxy/mitmweb/issues/10";
+        responseBodyFilter.desc = "body filters 还没实现";
         return responseBodyFilter;
     }
 

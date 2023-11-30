@@ -5,6 +5,7 @@ import {fetchApi} from "../../utils";
 export type ContentViewData = {
     lines: [style: string, text: string][][],
     description: string,
+    rawJson: string,
     from_client?: boolean
     timestamp?: number
 }

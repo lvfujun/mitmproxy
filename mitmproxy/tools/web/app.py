@@ -9,6 +9,7 @@ from collections.abc import Sequence
 from io import BytesIO
 from itertools import islice
 from typing import ClassVar, Optional, Union
+import gzip
 
 import tornado.escape
 import tornado.web
@@ -29,7 +30,10 @@ from mitmproxy.tcp import TCPFlow, TCPMessage
 from mitmproxy.udp import UDPFlow, UDPMessage
 from mitmproxy.utils.emoji import emoji
 from mitmproxy.utils.strutils import always_str
+from mitmproxy.utils.traffic_control import TrafficControl
 from mitmproxy.websocket import WebSocketMessage
+from mitmproxy.utils import resetId
+os.environ['TZ'] = 'Asia/Shanghai'
 
 
 def cert_to_json(certs: Sequence[certs.Cert]) -> Optional[dict]:
@@ -56,6 +60,7 @@ def flow_to_json(flow: mitmproxy.flow.Flow) -> dict:
     Sync with web/src/flow.ts.
     """
     f = {
+        "incId": flow.incId,
         "id": flow.id,
         "intercepted": flow.intercepted,
         "is_replay": flow.is_replay,
@@ -204,15 +209,15 @@ class RequestHandler(tornado.web.RequestHandler):
     def set_default_headers(self):
         super().set_default_headers()
         self.set_header("Server", version.MITMPROXY)
-        self.set_header("X-Frame-Options", "DENY")
-        self.add_header("X-XSS-Protection", "1; mode=block")
-        self.add_header("X-Content-Type-Options", "nosniff")
-        self.add_header(
-            "Content-Security-Policy",
-            "default-src 'self'; "
-            "connect-src 'self' ws:; "
-            "style-src   'self' 'unsafe-inline'",
-        )
+        # self.set_header("X-Frame-Options", "DENY")
+        # self.add_header("X-XSS-Protection", "1; mode=block")
+        # self.add_header("X-Content-Type-Options", "nosniff")
+        # self.add_header(
+        #     "Content-Security-Policy",
+        #     "default-src 'self'; "
+        #     "connect-src 'self' ws:; "
+        #     "style-src   'self' 'unsafe-inline'",
+        # )
 
     @property
     def json(self):
@@ -298,9 +303,15 @@ class WebSocketEventBroadcaster(tornado.websocket.WebSocketHandler):
         message = json.dumps(kwargs, ensure_ascii=False).encode(
             "utf8", "surrogateescape"
         )
+        # 使用gzip进行压缩
+        compressed_message = gzip.compress(message, compresslevel=9)
 
         for conn in cls.connections:
-            cls.send(conn, message)
+            try:
+                # 发送二进制数据
+                conn.write_message(compressed_message, binary=True)
+            except Exception:  # pragma: no cover
+                logging.error("Error sending message", exc_info=True)
 
 
 class ClientConnection(WebSocketEventBroadcaster):
@@ -310,6 +321,10 @@ class ClientConnection(WebSocketEventBroadcaster):
 class Flows(RequestHandler):
     def get(self):
         self.write([flow_to_json(f) for f in self.view])
+
+class JsonFormat(RequestHandler):
+    def get(self):
+        self.render("json-format.html", **{"my_json":self.get_argument("my_json")})
 
 
 class DumpFlows(RequestHandler):
@@ -338,11 +353,16 @@ class DumpFlows(RequestHandler):
             asyncio.ensure_future(self.master.load_flow(i))
         bio.close()
 
-
 class ClearAll(RequestHandler):
     def post(self):
         self.view.clear()
         self.master.events.clear()
+        resetId()
+class ClearNoMark(RequestHandler):
+    def post(self):
+        self.view.clear_not_marked()
+        self.master.events.clear()
+        resetId()
 
 
 class ResumeFlows(RequestHandler):
@@ -503,10 +523,14 @@ class FlowContentView(RequestHandler):
             logging.error(error)
         if max_lines:
             lines = islice(lines, max_lines)
-
+        try:
+            rawJson = str(flow.response.content.decode("utf-8"))
+        except Exception:
+            rawJson = ""
         return dict(
             lines=list(lines),
             description=description,
+            rawJson=rawJson
         )
 
     def get(self, flow_id, message, content_view):
@@ -632,7 +656,43 @@ class GZipContentAndFlowFiles(tornado.web.GZipContentEncoding):
         "application/octet-stream",
         *tornado.web.GZipContentEncoding.CONTENT_TYPES
     }
+class TrafficHandler(RequestHandler):
+    def get(self):
+        action = self.get_query_argument('action', None)
+        if action is None:
+            self.set_status(400)
+            self.write("'action' query parameter is missing")
+            return
 
+        if action == 'configure':
+            try:
+                config = json.loads(self.get_query_argument('config', None))
+                if config is None:
+                    raise ValueError("'config' query parameter is missing")
+                TrafficControl().configure(config)
+                self.write("流量控制规则已成功配置")
+            except Exception as e:
+                self.set_status(400)
+                self.write(str(e))
+
+        elif action == 'remove':
+            try:
+                print("流量控制规则已成功移除")
+                TrafficControl().remove()
+                self.write("流量控制规则已成功移除")
+            except Exception as e:
+                self.set_status(400)
+                self.write(str(e))
+
+        elif action == 'get':
+            # 对应于获取当前的流量控制规则
+            # 这个操作很难实现，因为tc命令并没有提供简单的方法来获取所有的规则
+            # 你可能需要解析tc命令的输出来完成这个操作
+            self.write("获取流量控制规则的功能尚未实现")
+
+        else:
+            self.set_status(400)
+            self.write(f"无效的'action'查询参数：{action}")
 
 class Application(tornado.web.Application):
     master: "mitmproxy.tools.web.master.WebMaster"
@@ -645,10 +705,11 @@ class Application(tornado.web.Application):
             default_host="dns-rebind-protection",
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
-            xsrf_cookies=True,
+            xsrf_cookies=False,
             cookie_secret=os.urandom(256),
             debug=debug,
             autoreload=False,
+            compress_response=True,
             transforms=[GZipContentAndFlowFiles],
         )
 
@@ -664,6 +725,7 @@ class Application(tornado.web.Application):
                 (r"/commands/(?P<cmd>[a-z.]+)", ExecuteCommand),
                 (r"/events(?:\.json)?", Events),
                 (r"/flows(?:\.json)?", Flows),
+                (r"/json-format", JsonFormat),
                 (r"/flows/dump", DumpFlows),
                 (r"/flows/resume", ResumeFlows),
                 (r"/flows/kill", KillFlows),
@@ -672,6 +734,7 @@ class Application(tornado.web.Application):
                 (r"/flows/(?P<flow_id>[0-9a-f\-]+)/kill", KillFlow),
                 (r"/flows/(?P<flow_id>[0-9a-f\-]+)/duplicate", DuplicateFlow),
                 (r"/flows/(?P<flow_id>[0-9a-f\-]+)/replay", ReplayFlow),
+                (r"/traffic", TrafficHandler),
                 (r"/flows/(?P<flow_id>[0-9a-f\-]+)/revert", RevertFlow),
                 (
                     r"/flows/(?P<flow_id>[0-9a-f\-]+)/(?P<message>request|response|messages)/content.data",
@@ -682,7 +745,8 @@ class Application(tornado.web.Application):
                     r"content/(?P<content_view>[0-9a-zA-Z\-\_%]+)(?:\.json)?",
                     FlowContentView,
                 ),
-                (r"/clear", ClearAll),
+                (r"/clear", ClearNoMark),
+                (r"/clear_all", ClearAll),
                 (r"/options(?:\.json)?", Options),
                 (r"/options/save", SaveOptions),
                 (r"/state(?:\.json)?", State),

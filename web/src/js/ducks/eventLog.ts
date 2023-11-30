@@ -5,7 +5,7 @@ export const RECEIVE = 'EVENTS_RECEIVE'
 export const TOGGLE_VISIBILITY = 'EVENTS_TOGGLE_VISIBILITY'
 export const TOGGLE_FILTER = 'EVENTS_TOGGLE_FILTER'
 
-type LogLevel = 'debug' | 'info' | 'web' | 'warn' | 'error';
+type LogLevel = 'debug' | 'info' | 'web' | 'warn' | 'error' | 'performance';
 
 export interface EventLogItem extends store.Item {
     message: string
@@ -19,7 +19,7 @@ interface EventLogState extends store.State<EventLogItem> {
 
 const defaultState: EventLogState = {
     visible: false,
-    filters: {debug: false, info: true, web: true, warn: true, error: true},
+    filters: {debug: true, info: true, web: true, warn: true, error: true, performance:true},
     ...store.defaultState
 };
 

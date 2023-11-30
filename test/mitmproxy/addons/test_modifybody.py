@@ -86,7 +86,7 @@ class TestModifyBodyFile:
     async def test_nonexistent(self, tmpdir, caplog):
         mb = modifybody.ModifyBody()
         with taddons.context(mb) as tctx:
-            with pytest.raises(Exception, match="Invalid file path"):
+            with pytest.raises(Exception, match="目标文件不存在"):
                 tctx.configure(mb, modify_body=["/~q/foo/@nonexistent"])
 
             tmpfile = tmpdir.join("replacement")

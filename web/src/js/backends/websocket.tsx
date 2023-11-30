@@ -7,6 +7,7 @@ import {fetchApi} from "../utils"
 import * as connectionActions from "../ducks/connection"
 import {Store} from "redux";
 import {RootState} from "../ducks";
+import pako from 'pako'; // 引入pako库
 
 const CMD_RESET = 'reset'
 
@@ -28,9 +29,10 @@ export default class WebsocketBackend {
 
     connect() {
         this.socket = new WebSocket(location.origin.replace('http', 'ws') + '/updates')
+        this.socket.binaryType = 'arraybuffer'; // 添加这一行，使得WebSocket可以接收二进制数据
         this.socket.addEventListener('open', () => this.onOpen())
         this.socket.addEventListener('close', event => this.onClose(event))
-        this.socket.addEventListener('message', msg => this.onMessage(JSON.parse(msg.data)))
+        this.socket.addEventListener('message', msg => this.onMessage(msg.data)) // 不要在这里解析JSON
         this.socket.addEventListener('error', error => this.onError(error))
     }
 
@@ -54,7 +56,27 @@ export default class WebsocketBackend {
             })
     }
 
-    onMessage(msg) {
+    onMessage(compressedData) {
+        let msg;
+        let decompressedData;
+        try {
+            // Try to decompress the data, it will fail if the data is not compressed
+            decompressedData = pako.inflate(compressedData, {to: 'string'});
+            msg = JSON.parse(decompressedData);
+        } catch (e) {
+            if (typeof compressedData === 'object') {
+                msg = compressedData
+            } else {
+                // If decompression fails, then data might not be compressed
+                try {
+                    msg = JSON.parse(compressedData);
+                } catch (e) {
+                    console.error("Failed to parse the message", e);
+                    return;
+                }
+            }
+
+        }
 
         if (msg.cmd === CMD_RESET) {
             return this.fetchData(msg.resource)

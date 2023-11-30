@@ -1,5 +1,6 @@
 import io
 
+import piexif
 from kaitaistruct import KaitaiStream
 
 from mitmproxy.contrib.kaitaistruct import gif
@@ -58,9 +59,8 @@ def parse_gif(data: bytes) -> Metadata:
             if comment != b"":
                 parts.append(("comment", str(comment)))
     return parts
-
-
-def parse_jpeg(data: bytes) -> Metadata:
+from typing import List, Tuple
+def parse_jpeg(data: bytes) -> List[Tuple[str, str]]:
     img = jpeg.Jpeg(KaitaiStream(io.BytesIO(data)))
     parts = [("Format", "JPEG (ISO 10918)")]
     for segment in img.segments:
@@ -91,9 +91,17 @@ def parse_jpeg(data: bytes) -> Metadata:
                         parts.append(
                             (field.tag._name_, field.data.decode("UTF-8").strip("\x00"))
                         )
+                exif_data = piexif.load(data)
+
+                # Accessing all data in exif_data
+                for ifd_name in ("Exif", "GPS"):
+                    for tag in exif_data[ifd_name]:
+                        tag_name = piexif.TAGS[ifd_name][tag]["name"]
+                        tag_value = exif_data[ifd_name][tag]
+                        if isinstance(tag_value, bytes):
+                            tag_value = tag_value.decode("utf-8", errors="ignore")
+                        parts.append((tag_name, str(tag_value)))
     return parts
-
-
 def parse_ico(data: bytes) -> Metadata:
     img = ico.Ico(KaitaiStream(io.BytesIO(data)))
     parts = [

@@ -28,7 +28,7 @@ export const testState: RootState = {
             "type": "bool",
             "default": false,
             "value": false,
-            "help": "Strip out request headers that might cause the server to return 304-not-modified.",
+            "help": "去掉可能导致服务器返回未修改304的请求头。",
             "choices": undefined
         },
         body_size_limit: {
@@ -113,7 +113,8 @@ export const testState: RootState = {
             info: true,
             web: false,
             warn: true,
-            error: true
+            error: true,
+            performance:true
         },
         view: [
             {id: "1", level: 'info', message: 'foo'},
