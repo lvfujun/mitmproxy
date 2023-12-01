@@ -12,25 +12,25 @@ export default function CaptureSetup() {
     if (servers.length === 0) {
         configure_action_text = "";
     } else if (servers.length === 1) {
-        configure_action_text = "Configure your client to use the following proxy server:";
+        configure_action_text = "请将您的客户端配置为使用以下代理服务器：";
     } else {
-        configure_action_text = "Configure your client to use one of the following proxy servers:";
+        configure_action_text = "请将您的客户端配置为使用以下其中一个代理服务器：";
     }
 
     return <div style={{padding: "1em 2em"}}>
 
-        <h3>mitmproxy is running.</h3>
+        <h3>太乙已启动。</h3>
         <p>
-            No flows have been recorded yet.<br/>
+            尚未记录任何流。<br/>
             {configure_action_text}
         </p>
         <ul className="fa-ul">
             {servers.map((server, i) => <li key={server.full_spec}><ServerDescription {...server}/></li>)}
         </ul>
         {/*
-        <p>You can also start additional servers:</p>
+        <p>您还可以启动额外的服务器：</p>
         <ul>
-            <li>TODO</li>
+            <li>待定</li>
         </ul>
         */}
 
@@ -59,7 +59,7 @@ export function ServerDescription(
     if (all_same_port && unbound) {
         listen_str = formatAddress(["*", listen_addrs[0][1]]);
     } else {
-        listen_str = listen_addrs.map(formatAddress).join(" and ");
+        listen_str = listen_addrs.map(formatAddress).join(" 和 ");
     }
     description = description[0].toUpperCase() + description.substr(1);
     let desc, icon;
@@ -71,7 +71,7 @@ export function ServerDescription(
         desc = <>{description} ({full_spec})</>
     } else {
         icon = "fa-check text-success"
-        desc = `${description} listening at ${listen_str}.`
+        desc = `${description} 正在 ${listen_str}处监听。`
 
         if (wireguard_conf) {
             desc = <>
