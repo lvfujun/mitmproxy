@@ -94,7 +94,7 @@ setup(
         "publicsuffix2>=2.20190812,<3",
         "zstandard>=0.11,<0.18",
         "werkzeug>=2.3.7,<3",
-        "piexif>=1.1.3, <1"
+        "piexif>=1.1.3,<2"
     ],
     extras_require={
         ':sys_platform == "win32"': [
