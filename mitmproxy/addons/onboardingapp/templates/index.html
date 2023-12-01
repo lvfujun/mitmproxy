@@ -1,130 +1,123 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="row justify-content-md-center">
-    <div class="col-md-9">
+  <div class="col-md-9">
 <!--suppress HtmlUnknownTag -->
 <h3 class="my-4">安装证书</h3>
 
 {% macro entry(title, icon, filetype="pem") -%}
 <li class="media">
-    {% include 'icons/' + icon + '-brands.svg' %}
-    <div class="media-body">
-        <h5 class="mt-0">{{ title | safe }}</h5>
-        <a class="btn btn-sm btn-success" href="/cert/{{ filetype }}" target="_blank">🔏 Get proxy-ca-cert.{{
-            filetype }}</a>
-        <a class="btn btn-sm btn-info show-instructions" href="#{{ title.split(' ')[0] }}" id="{{ title.split(' ')[0] }}">📖
-            Show Instructions</a>
-        <a class="btn btn-sm btn-info hide-instructions" href="#/">📖 Hide Instructions</a>
-        <div class="instructions">{{ caller() }}</div>
-    </div>
+  {% include 'icons/' + icon + '-brands.svg' %}
+  <div class="media-body">
+    <h5 class="mt-0">{{ title | safe }}</h5>
+    <a class="btn btn-sm btn-success" href="/cert/{{ filetype }}" target="_blank">获取 proxy-ca-cert.{{ filetype }}</a>
+    <a class="btn btn-sm btn-info show-instructions" href="#{{ title.split(' ')[0] }}" id="{{ title.split(' ')[0] }}">显示说明</a>
+    <a class="btn btn-sm btn-info hide-instructions" href="#/">隐藏说明</a>
+    <div class="instructions">{{ caller() }}</div>
+  </div>
 </li>
 {%- endmacro %}
 
 <ul class="list-unstyled">
-    {% call entry('Windows', 'windows', 'p12') %}
-    <h5>Manual Installation</h5>
-    <ol>
-        <li>Double-click the P12 file to start the import wizard.</li>
-        <li>Select a certificate store location. This determines who will trust the certificate &ndash; only the current
-            Windows user or everyone on the machine. Click <samp>Next</samp>.
-        </li>
-        <li>Click <samp>Next</samp> again.</li>
-        <li>Leave <samp>Password</samp> blank and click <samp>Next</samp>.</li>
-        <li><span class="text-danger">Select <samp>Place all certificates in the following store</samp></span>,
-            then click <samp>Browse</samp>, and select <samp>Trusted Root Certification Authorities</samp>.<br>
-            Click <samp>OK</samp> and <samp>Next</samp>.
-        </li>
-        <li>Click <samp>Finish</samp>.</li>
-        <li>Click <samp>Yes</samp> to confirm the warning dialog.</li>
-    </ol>
-    <h5>Automated Installation</h5>
-    <ol>
-        <li>Run <code>certutil.exe -addstore root proxy-ca-cert.cer</code>
-            (<a href="https://technet.microsoft.com/en-us/library/cc732443.aspx">details</a>).
-        </li>
-    </ol>
-    {% endcall %}
-    {% call entry('Linux', 'linux') %}
-    <h5>Ubuntu/Debian</h5>
-    <ol>
-        <li><code>mv proxy-ca-cert.pem /usr/local/share/ca-certificates/proxy.crt</code></li>
-        <li><code>sudo update-ca-certificates</code></li>
-    </ol>
-    {% endcall %}
-    {% call entry('macOS', 'apple') %}
-    <h5>Manual Installation</h5>
-    <ol>
-        <li>Double-click the PEM file to open the <samp>Keychain Access</samp> application.</li>
-        <li>Locate the new certificate "proxy" in the list and double-click it.</li>
-        <li>Change <samp>Secure Socket Layer (SSL)</samp> to <samp>Always Trust</samp>.</li>
-        <li>Close the dialog window and enter your password if prompted.</li>
-    </ol>
-    <h5>Automated Installation</h5>
-    <ol>
-        <li><code>sudo security add-trusted-cert -d -p ssl -p basic -k /Library/Keychains/System.keychain proxy-ca-cert.pem</code></li>
-    </ol>
-    {% endcall %}
-    {% call entry('iOS <small>– please read the instructions!</small>', 'apple') %}
-    <h5>iOS 13+</h5>
-    <ol>
-        <li>Use Safari to download the certificate. Other browsers may not open the proper installation prompt.</li>
-        <li>Install the new Profile (<samp>Settings -> General -> VPN & Device Management</samp>).</li>
-        <li><span class="text-danger"><strong>Important:</strong> Go to <samp>Settings -> General -> About -> Certificate Trust Settings</samp>.
-            Toggle <samp>proxy</samp> to <samp>ON</samp>.</span></li>
-    </ol>
-    {% endcall %}
-    {% call entry('Android', 'android', 'cer') %}
-    <h5>Android 10+</h5>
-    <ol class="mb-2">
-        <li>Open the downloaded CER file.</li>
-        <li>Enter <samp>proxy</samp> (or anything else) as the certificate name.</li>
-        <li>For credential use, select <samp>VPN and apps</samp>.</li>
-        <li>Click OK.</li>
-    </ol>
+  {% call entry('Windows', 'windows', 'p12') %}
+  <h5>手动安装</h5>
+  <ol>
+    <li>双击 P12 文件以启动导入向导。</li>
+    <li>选择证书存储位置。这决定谁将信任证书 - 当前 Windows 用户还是机器上的所有用户。点击<samp>下一步</samp>。</li>
+    <li>点击<samp>下一步</samp>。</li>
+    <li>保留<samp>密码</samp>为空白并点击<samp>下一步</samp>。</li>
+    <li><span class="text-danger">选择<samp>将所有证书放在以下存储中</samp>,然后点击<samp>浏览</samp>,选择<samp> Trusted Root Certification Authorities</samp>。</span>点击<samp>确定</samp>和<samp>下一步</samp>。</li>
+    <li>点击<samp>完成</samp>。</li>
+    <li>点击<samp>是</samp>确认警告对话框。</li>
+  </ol>
+  <h5>自动安装</h5>
+  <ol>
+    <li>运行<code>certutil.exe -addstore root proxy-ca-cert.cer</code>(<a href="https://technet.microsoft.com/en-us/library/cc732443.aspx">详情</a>)。</li>
+  </ol>
+  {% endcall %}
 
-    <p>Some Android distributions require you to install the certificate via <samp>Settings -> Security -> Advanced ->
-        Encryption and credentials -> Install a certificate -> CA certificate</samp> (or similar) instead.</p>
+  {% call entry('Linux', 'linux') %}
+  <h5>Ubuntu/Debian</h5>
+  <ol>
+    <li><code>mv proxy-ca-cert.pem /usr/local/share/ca-certificates/proxy.crt</code></li>
+    <li><code>sudo update-ca-certificates</code></li>
+  </ol>
+  {% endcall %}
 
-    <div class="alert alert-warning" role="alert">
-        <p><strong>Warning: </strong>Apps that target Android API Level 24 (introduced in 2016) and above only accept
-            certificates from the system trust store
-            (<a href="https://github.com/proxy/proxy/issues/2054">#2054</a>).
-            User-added CAs are not accepted unless the application manually opts in. Except for browsers, you need to
-            patch most apps manually
-            (<a href="https://developer.android.com/training/articles/security-config">Android network security config</a>).
-        </p>
-    </div>
-    {% endcall %}
-    {% call entry('Firefox <small>(does not use the OS root certificates)</small>', 'firefox-browser') %}
-    <h5>Firefox</h5>
-    <ol>
-        <li>Open <samp>Options -> Privacy &amp; Security</samp> and click <samp>View Certificates...</samp>
-            at the bottom of the page.</li>
-        <li>Click <samp>Import...</samp> and select the downloaded certificate.</li>
-        <li>Enable <samp>Trust this CA to identify websites</samp> and click <samp>OK</samp>.</li>
-    </ol>
-    {% endcall %}
-    <li class="media">
-    {% include 'icons/certificate-solid.svg' %}
-    <div class="media-body">
-        <h5 class="mt-0">Other Platforms</h5>
-        <a class="btn btn-sm btn-success" href="/cert/pem" target="_blank">🔏 Get proxy-ca-cert.pem</a>
-        <a class="btn btn-sm btn-success" href="/cert/p12" target="_blank">🔏 Get proxy-ca-cert.p12</a>
-    </div>
-    </li>
+  {% call entry('macOS', 'apple') %}
+  <h5>手动安装</h5>
+  <ol>
+    <li>双击 PEM 文件打开<samp>Keychain Access</samp>应用。</li>
+    <li>在列表中找到新证书"proxy"并双击它。</li>
+    <li>将<samp>Secure Socket Layer (SSL)</samp>更改为<samp>Always Trust</samp>。</li>
+    <li>关闭对话框窗口并在提示时输入密码。</li>
+  </ol>
+
+  <h5>自动安装</h5>
+  <ol>
+    <li><code>sudo security add-trusted-cert -d -p ssl -p basic -k /Library/Keychains/System.keychain proxy-ca-cert.pem</code></li>
+  </ol>
+  {% endcall %}
+
+  {% call entry('iOS <small>– 请阅读说明!</small>', 'apple') %}
+
+  <h5>iOS 13+</h5>
+
+  <ol>
+    <li>使用 Safari 下载证书。其他浏览器可能无法打开正确的安装提示。</li>
+    <li>安装新的配置文件(<samp>设置 -> 总览 -> VPN 和设备管理</samp>)。</li>
+    <li><span class="text-danger"><strong>重要:</strong>进入<samp>设置 -> 总览 -> 关于 -> 证书信任设置</samp>。将<samp>proxy</samp>切换为<samp>开</samp>。</span></li>
+  </ol>
+  {% endcall %}
+
+  {% call entry('Android', 'android', 'cer') %}
+
+  <h5>Android 10+</h5>
+
+  <ol class="mb-2">
+    <li>打开下载的CER文件。</li>
+    <li>将证书名称输入为<samp>proxy</samp>(或者其他名称)。</li>
+    <li>为证书使用选择<samp>VPN和应用</samp>。</li>
+    <li>点击确定。</li>
+  </ol>
+
+  <p>一些Android分发版本可能要求您通过<samp>设置 -> 安全性 -> 高级 -> 加密和凭据 -> 安装证书 -> CA证书</samp>(或类似)来安装证书,而不是直接打开CER文件。</p>
+
+  <div class="alert alert-warning" role="alert">
+    <p><strong>警告:</strong> 自2016年(Android API等级24)起,针对等级24及以上的应用,只接受系统信任库中的证书(<a href="https://github.com/proxy/proxy/issues/2054">#2054</a>)。除非应用手动允许,否则用户添加的CA不会被接受。除浏览器外,您需要手动修补大多数应用。</p>
+  </div>
+  {% endcall %}
+
+  {% call entry('Firefox <small>(不使用操作系统根证书)</small>', 'firefox-browser') %}
+
+  <h5>Firefox</h5>
+
+  <ol>
+    <li>打开<samp>选项 -> 隐私和安全</samp>然后点击底部的<samp>查看证书...</samp>。</li>
+    <li>点击<samp>导入...</samp>选择下载的证书。</li>
+    <li>启用<samp>信任此CA识别网站</samp>然后点击<samp>确定</samp>。</li>
+  </ol>
+  {% endcall %}
+
+  <li class="media">
+  {% include 'icons/certificate-solid.svg' %}
+  <div class="media-body">
+    <h5 class="mt-0">其他平台</h5>
+    <a class="btn btn-sm btn-success" href="/cert/pem" target="_blank">获取 proxy-ca-cert.pem</a>
+    <a class="btn btn-sm btn-success" href="/cert/p12" target="_blank">获取 proxy-ca-cert.p12</a>
+  </div>
+  </li>
 </ul>
-    </div>
+  </div>
 
 </div>
 <hr/>
 
 <p>
-    Other proxy users cannot intercept your connection.
-    <span class="text-muted">
-    This page is served by your local proxy instance. The certificate you are about to install has been uniquely
-    generated on proxy's first run and is not shared
-    between proxy installations.
-    </span>
+  其他代理用户无法拦截您的连接。
+  <span class="text-muted">
+  该页面由您的本地代理实例提供。您即将安装的证书是在代理第一次运行时唯一生成的,不会在代理安装之间共享。
+  </span>
 </p>
 
 
