@@ -29,7 +29,7 @@ export default React.memo(function FileMenu() {
                 <i className="fa fa-fw fa-floppy-o"/>&nbsp;保存工作副本
             </MenuItem>
             <MenuItem onClick={() => location.replace('/flows/dump?filter=' + filter)}>
-                <i className="fa fa-fw fa-floppy-o"/>&nbsp;Save filtered
+                <i className="fa fa-fw fa-floppy-o"/>&nbsp;仅保存筛选的
             </MenuItem>
             <MenuItem onClick={() => confirm('Delete all flows?') && dispatch(flowsActions.clear())}>
                 <i className="fa fa-fw fa-trash"/>&nbsp;清空请求
