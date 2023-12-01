@@ -1,4 +1,5 @@
 import os
+import re
 import threading
 from enum import Enum
 from functools import lru_cache
@@ -234,3 +235,8 @@ def is_tls_record_magic(d):
     # http://www.moserware.com/2009/06/first-few-milliseconds-of-https.html#client-hello
     # https://tls13.ulfheim.net/
     return len(d) == 3 and d[0] == 0x16 and d[1] == 0x03 and 0x0 <= d[2] <= 0x03
+
+def extract_domain(http_request: bytes) -> Optional[str]:
+    pattern = br"Host:\s+(.*?)\r\n"
+    match = re.search(pattern, http_request)
+    return match.group(1).decode() if match else None

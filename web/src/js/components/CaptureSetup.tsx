@@ -21,7 +21,7 @@ export default function CaptureSetup() {
 
         <h3>太乙已启动。</h3>
         <p>
-            尚未记录任何流。<br/>
+            尚未记录任何流量。<br/>
             {configure_action_text}
         </p>
         <ul className="fa-ul">

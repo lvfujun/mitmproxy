@@ -20,7 +20,7 @@ import struct
 from typing import Any, Callable, Iterable, Optional, Union
 
 from mitmproxy import ctx, dns, exceptions, connection
-from mitmproxy.net.tls import is_tls_record_magic
+from mitmproxy.net.tls import is_tls_record_magic, extract_domain
 from mitmproxy.proxy.layers.http import HTTPMode
 from mitmproxy.proxy import context, layer, layers
 from mitmproxy.proxy.layers import modes
@@ -68,47 +68,74 @@ class NextLayer:
                 re.compile(x, re.IGNORECASE) for x in ctx.options.allow_hosts
             ]
 
+
     def ignore_connection(
-        self,
-        server_address: Optional[connection.Address],
-        data_client: bytes,
-        *,
-        is_tls: Callable[[bytes], bool] = is_tls_record_magic,
-        client_hello: Callable[[bytes], Optional[ClientHello]] = parse_client_hello
+            self,
+            server_address: Optional[connection.Address],
+            data_client: bytes,
+            *,
+            is_tls: Callable[[bytes], bool] = is_tls_record_magic,
+            get_domain: Callable[[bytes], str] = extract_domain,
+            client_hello: Callable[[bytes], Optional[ClientHello]] = parse_client_hello
     ) -> Optional[bool]:
         """
+        This function is used to determine whether a connection should be ignored or not.
         Returns:
             True, if the connection should be ignored.
             False, if it should not be ignored.
             None, if we need to wait for more input data.
         """
+
+        # If both ignore_hosts and allow_hosts are empty, then we do not need to ignore any connections
         if not ctx.options.ignore_hosts and not ctx.options.allow_hosts:
             return False
 
+        # Initialize an empty list to store the hostnames involved in the connection
         hostnames: list[str] = []
+
+        # If a server address is provided, add its hostname to the list
         if server_address is not None:
             hostnames.append(server_address[0])
+
+        # If the client data is a TLS record, try to parse the client hello message
+        # and get the SNI (Server Name Indication) to add to the hostnames list
         if is_tls(data_client):
             try:
                 ch = client_hello(data_client)
                 if ch is None:  # not complete yet
                     return None
-                sni = ch.sni
+                if ch.sni:
+                    hostnames.append(ch.sni)
             except ValueError:
                 pass
-            else:
-                if sni:
-                    hostnames.append(sni)
+        # If the client data is not a TLS record, try to extract the domain from the HTTP request
+        else:
+            domain = ""
+            try:
+                domain = get_domain(data_client)
+            except ValueError:
+                pass
+            if domain:
+                hostnames.append(domain)
 
+        # If there are no hostnames, the connection does not need to be ignored
         if not hostnames:
             return False
 
+        # Special handling for wireguard mode: if the hostname is "10.0.0.53", do not ignore the connection
+        if "wireguard" in ctx.options.mode and "10.0.0.53" in hostnames:
+            return False
+
+        # If there are ignore_hosts, check if any of the hostnames match the patterns in ignore_hosts
+        # If a match is found, ignore this connection
         if ctx.options.ignore_hosts:
             return any(
                 re.search(rex, host, re.IGNORECASE)
                 for host in hostnames
                 for rex in ctx.options.ignore_hosts
             )
+        # If there are allow_hosts, check if any of the hostnames match the patterns in allow_hosts
+        # If no match is found, ignore this connection
         elif ctx.options.allow_hosts:
             return not any(
                 re.search(rex, host, re.IGNORECASE)
@@ -116,8 +143,9 @@ class NextLayer:
                 for rex in ctx.options.allow_hosts
             )
         else:  # pragma: no cover
-            raise AssertionError()
-
+            # If we reach this point, it means that neither ignore_hosts nor allow_hosts are set,
+            # which should not happen because we have checked this at the beginning of this function.
+            raise AssertionError("Neither ignore_hosts or allow_hosts are set in options.")
     def setup_tls_layer(self, context: context.Context) -> layer.Layer:
         def s(*layers):
             return stack_match(context, layers)
