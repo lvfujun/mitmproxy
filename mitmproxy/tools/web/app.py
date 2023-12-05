@@ -506,7 +506,7 @@ class FlowContentView(RequestHandler):
         if max_lines:
             lines = islice(lines, max_lines)
         try:
-            rawJson = str(flow.response.content.decode("utf-8"))
+            rawJson = str(message.content.decode("utf-8"))
         except Exception:
             rawJson = ""
         return dict(
