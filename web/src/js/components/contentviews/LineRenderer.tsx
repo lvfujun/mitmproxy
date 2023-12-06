@@ -56,7 +56,7 @@ function FrameWrapper(rawJson: string) {
         function handleResize() {
             const contentView = document.querySelector('.contentview');
             if (contentView) {
-                const width = contentView.getBoundingClientRect().width;
+                const width = contentView.getBoundingClientRect().width.toString();
                 setDivWidth(width);
             }
         }

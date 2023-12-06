@@ -12,17 +12,24 @@ export default (Component) =>
 
             UNSAFE_componentWillUpdate() {
                 const viewport = ReactDOM.findDOMNode(this);
-                this[symShouldStick] =
-                    viewport.scrollTop && isAtBottom(viewport);
+                // @ts-ignore
+                if ("scrollTop" in viewport) {
+                    this[symShouldStick] =
+                        viewport.scrollTop && isAtBottom(viewport);
+                }
                 super.UNSAFE_componentWillUpdate &&
                     super.UNSAFE_componentWillUpdate();
                 super.componentWillUpdate && super.componentWillUpdate();
             }
 
             componentDidUpdate() {
+                // @ts-ignore
                 const viewport = ReactDOM.findDOMNode(this);
                 if (this[symShouldStick] && !isAtBottom(viewport)) {
-                    viewport.scrollTop = viewport.scrollHeight;
+                    // @ts-ignore
+                    if ("scrollTop" in viewport) {
+                        viewport.scrollTop = viewport.scrollHeight;
+                    }
                 }
                 super.componentDidUpdate && super.componentDidUpdate();
             }
