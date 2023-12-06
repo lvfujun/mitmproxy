@@ -34,6 +34,7 @@
 """
 
 import functools
+import json
 import re
 import sys
 from collections.abc import Sequence
@@ -41,6 +42,7 @@ from typing import ClassVar, Protocol, Union
 import pyparsing as pp
 
 from mitmproxy import dns, flow, http, tcp, udp
+from mitmproxy.utils.strutils import escaped_str_to_bytes
 
 
 def only(*types):
@@ -287,13 +289,42 @@ class FBod(_Rex):
 
     @only(http.HTTPFlow, tcp.TCPFlow, udp.UDPFlow, dns.DNSFlow)
     def __call__(self, f):
+        json_mime_types = ["application/json", "application/json-rpc", "application/jsonp"]
+
         if isinstance(f, http.HTTPFlow):
-            if f.request and f.request.raw_content:
-                if self.re.search(f.request.get_content(strict=False)):
+            # Handle HTTP response
+            if f.response:
+                content_type = f.response.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.response.get_content(strict=False)
+                        if "application/jsonp" in content_type:
+                            # Strip JSONP padding
+                            jsonp_pattern = rb"^[^\(]*\((.*)\)[^\)]*$"
+                            match = re.match(jsonp_pattern, content)
+                            if match:
+                                content = match.group(1)
+                        json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.response.raw_content and self.re.search(f.response.get_content(strict=False)):
                     return True
-            if f.response and f.response.raw_content:
-                if self.re.search(f.response.get_content(strict=False)):
+            # Handle HTTP request
+            if f.request:
+                content_type = f.request.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.request.get_content(strict=False)
+                        json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.request.raw_content and self.re.search(f.request.get_content(strict=False)):
                     return True
+            # Handle websocket
             if f.websocket:
                 for msg in f.websocket.messages:
                     if self.re.search(msg.content):
@@ -339,16 +370,32 @@ class FBodResponse(_Rex):
     help = "Response body"
     flags = re.DOTALL
 
-    @only(http.HTTPFlow, tcp.TCPFlow, udp.UDPFlow, dns.DNSFlow)
     def __call__(self, f):
+        json_mime_types = ["application/json", "application/json-rpc", "application/jsonp"]
+
         if isinstance(f, http.HTTPFlow):
-            if f.response and f.response.raw_content:
-                if self.re.search(f.response.get_content(strict=False)):
+            if f.response:
+                content_type = f.response.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.response.get_content(strict=False)
+                        if "application/jsonp" in content_type:
+                            # Strip JSONP padding
+                            jsonp_pattern = rb"^[^\(]*\((.*)\)[^\)]*$"
+                            match = re.match(jsonp_pattern, content)
+                            if match:
+                                content = match.group(1)
+                        json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.response.raw_content and self.re.search(f.response.get_content(strict=False)):
                     return True
-            if f.websocket:
-                for msg in f.websocket.messages:
-                    if not msg.from_client and self.re.search(msg.content):
-                        return True
+                if f.websocket:
+                    for msg in f.websocket.messages:
+                        if not msg.from_client and self.re.search(msg.content):
+                            return True
         elif isinstance(f, (tcp.TCPFlow, udp.UDPFlow)):
             for msg in f.messages:
                 if not msg.from_client and self.re.search(msg.content):
@@ -356,7 +403,6 @@ class FBodResponse(_Rex):
         elif isinstance(f, dns.DNSFlow):
             if f.response and self.re.search(f.response.content):
                 return True
-
 
 class FMethod(_Rex):
     code = "m"

@@ -2082,7 +2082,10 @@ export default (function() {
     function body(regex){
         regex = new RegExp(regex, "i");
         function bodyFilter(flow){
-            return regex.test(flow.comment)
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
         bodyFilter.desc = "body filters " + regex;
         return bodyFilter;
@@ -2092,9 +2095,12 @@ export default (function() {
     function requestBody(regex){
         regex = new RegExp(regex, "i");
         function requestBodyFilter(flow){
-            return true;
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
-        requestBodyFilter.desc = "body filters 还没实现";
+        requestBodyFilter.desc = "body filters " + regex;
         return requestBodyFilter;
     }
 
@@ -2102,9 +2108,12 @@ export default (function() {
     function responseBody(regex){
         regex = new RegExp(regex, "i");
         function responseBodyFilter(flow){
-            return true;
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
-        responseBodyFilter.desc = "body filters 还没实现";
+        responseBodyFilter.desc = "body filters " + regex;
         return responseBodyFilter;
     }
 

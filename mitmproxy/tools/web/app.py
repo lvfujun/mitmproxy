@@ -352,7 +352,23 @@ class DumpFlows(RequestHandler):
         for i in io.FlowReader(bio).stream():
             asyncio.ensure_future(self.master.load_flow(i))
         bio.close()
+class FilterFlows(RequestHandler):
+    def get(self):
+        self.set_header("Content-Type", "application/json")
+        try:
+            match = flowfilter.parse(self.request.arguments["filter"][0].decode())
+        except ValueError:  # thrown by flowfilter.parse if filter is invalid
+            raise APIError(400, f"Invalid filter argument / regex")
+        except (KeyError, IndexError):  # Key+Index: ["filter"][0] can fail, if it's not set
+            match = bool  # returns always true
 
+        matched_incr_ids = []
+        for f in self.view:
+            if match(f):
+                matched_incr_ids.append(f.incId)
+        self.set_status(200)
+        # Write the list of incrIds to the response
+        self.write(json.dumps(matched_incr_ids))
 class ClearAll(RequestHandler):
     def post(self):
         self.view.clear()
@@ -727,6 +743,7 @@ class Application(tornado.web.Application):
                 (r"/flows(?:\.json)?", Flows),
                 (r"/json-format", JsonFormat),
                 (r"/flows/dump", DumpFlows),
+                (r"/flows/filter", FilterFlows),
                 (r"/flows/resume", ResumeFlows),
                 (r"/flows/kill", KillFlows),
                 (r"/flows/(?P<flow_id>[0-9a-f\-]+)", FlowHandler),
