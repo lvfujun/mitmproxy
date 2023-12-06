@@ -1,4 +1,5 @@
 import json
+import random
 import re
 from collections.abc import Sequence
 
@@ -55,33 +56,42 @@ class ModifyBody:
             path = re.sub(r'(\[\d+\]|\[".*?"\]|\[\'*?\'\]|\[\*\])', r'->\1', path)
 
             return path
+
         def set_nested_item(obj, path, value):
             nonlocal auto_increment_id  # 使用 nonlocal 而不是 global
             if len(path) == 1:
                 # 检查replacement_str是否包含{}
-                if '{}' in value:
+                if isinstance(value, str) and '{}' in value:
                     value = value.replace('{}', str(auto_increment_id))
                     auto_increment_id += 1  # 自增ID
                 key = path[0]
                 if '[' in key and ']' in key:
                     key, index = key.rstrip(']').split('[')
                     if index == '*':
-                        for i in range(len(obj[key])):
-                            obj[key][i] = value
+                        if key and isinstance(obj, dict):
+                            for i in range(len(obj[key])):
+                                obj[key][i] = value
+                        else:
+                            for i in range(len(obj)):
+                                obj[i] = value
                     else:
                         index = int(index)  # 将索引转换为整数
-                        obj[key][index] = value
+                        if key and isinstance(obj, dict):
+                            obj[key][index] = value
+                        elif isinstance(obj, list):
+                            obj[index] = value
                 elif key == '*':
                     for i in range(len(obj)):
                         obj[i] = value
                 else:
-                    obj[key] = value
+                    if isinstance(obj, dict):
+                        obj[key] = value
             else:
                 key = path[0]
                 if '[' in key and ']' in key:
                     key, index = key.rstrip(']').split('[')
                     if index == '*':
-                        if key:
+                        if key and isinstance(obj, dict):
                             for i in range(len(obj[key])):
                                 set_nested_item(obj[key][i], path[1:], value)
                         else:
@@ -89,16 +99,16 @@ class ModifyBody:
                                 set_nested_item(obj[i], path[1:], value)
                     else:
                         index = int(index)  # 将索引转换为整数
-                        if key:
+                        if key and isinstance(obj, dict):
                             set_nested_item(obj[key][index], path[1:], value)
-                        else:
+                        elif isinstance(obj, list):
                             set_nested_item(obj[index], path[1:], value)
                 elif key == '*':
                     for i in range(len(obj)):
                         set_nested_item(obj[i], path[1:], value)
                 else:
-                    set_nested_item(obj[key], path[1:], value)
-
+                    if isinstance(obj, dict):
+                        set_nested_item(obj[key], path[1:], value)
         for spec in self.replacements:
             if spec.matches(flow):
                 try:
@@ -110,24 +120,15 @@ class ModifyBody:
                 if flow.response:
                     content = flow.response.content
 
-                    if not spec.subject.startswith(b'JSON->'):
-                        content = re.sub(spec.subject, replacement, content, flags=re.DOTALL)
 
                     subject_str = spec.subject.decode('utf-8')
                     replacement_str = replacement.decode('utf-8')
-                    # 检查replacement_str是否包含{}
-                    if '{}' in replacement_str:
-                        replacement_str = replacement_str.replace('{}', str(auto_increment_id))
-                        auto_increment_id += 1  # 自增ID
+
                     unicode_escape_subject = json.dumps(subject_str)[1:-1]
                     unicode_escape_replacement = json.dumps(replacement_str)[1:-1]
 
                     unicode_escape_subject_bytes = escaped_str_to_bytes(unicode_escape_subject)
                     unicode_escape_replacement_bytes = escaped_str_to_bytes(unicode_escape_replacement)
-
-                    if unicode_escape_subject_bytes in content:
-                        ctx.log.info(f"在响应内容中，将 {subject_str} 替换为 {replacement_str}。URL: {flow.request.url}")
-                        content = content.replace(unicode_escape_subject_bytes, unicode_escape_replacement_bytes)
 
                     if flow.response.headers.get('Content-Type', '').lower().startswith('application/json'):
                         try:
@@ -163,6 +164,16 @@ class ModifyBody:
                                 ctx.log.warn(f"JSON path not found: {subject_str}")
 
                             content = json.dumps(json_content).encode()
+                    # 检查replacement_str是否包含{}
+                    if '{}' in replacement_str:
+                        replacement_str = replacement_str.replace('{}', str(auto_increment_id))
+                        auto_increment_id += 1  # 自增ID
+                    if unicode_escape_subject_bytes in content:
+                        ctx.log.info(f"在响应内容中，将 {subject_str} 替换为 {replacement_str}。URL: {flow.request.url}")
+                        content = content.replace(unicode_escape_subject_bytes, unicode_escape_replacement_bytes)
+                    if not spec.subject.startswith(b'JSON->'):
+                        content = re.sub(spec.subject, replacement, content, flags=re.DOTALL)
+
                     flow.response.content = content
                 else:
                     # 对请求内容进行类似的替换，如果需要的话

@@ -742,7 +742,7 @@ JSON.BigNumber = BigNumber = TRbignumber, JSON.parse = TRparse(), JSON.stringify
             t.length ? t.show() : t = $('<b class="boxOpt"><a class="opt-copy" title="复制当前选中节点的JSON数据">复制</a>|<a class="opt-download" target="_blank" title="下载当前选中节点的JSON数据">下载</a>|<a class="opt-del" title="删除当前选中节点的JSON数据">删除</a></b>').appendTo(e), t.find("a.opt-download").unbind("click").bind("click", n), t.find("a.opt-copy").unbind("click").bind("click", i), t.find("a.opt-del").unbind("click").bind("click", o)
         }
     }, p = function (e, t) {
-        r || (r = $('<div id="statusBar"/>').appendTo("body")), t ? (r.show(), function (e) {
+        r || (r = $('<div id="statusBar"/>').appendTo("body")), t ? (r.hide(), function (e) {
             let t = [];
             do {
                 if (e.hasClass("item-block")) {
@@ -753,8 +753,10 @@ JSON.BigNumber = BigNumber = TRbignumber, JSON.parse = TRparse(), JSON.stringify
                 e = e.parent().parent()
             } while (e.length && !e.hasClass("rootItem"));
             let n = t.join("#@#").replace(/#@#\[/g, "[").replace(/#@#/g, "."), i = $("#jsonPath");
-            i.length || (i = $('<span id="jsonPath"/>').prependTo(r)), i.html("当前节点：JSON." + n)
-        }(e)) : r.hide()
+            window.statusBarCheckInterval(false);
+            i.length || (i = $('<span id="jsonPath"/>').prependTo(r)),
+            i.html('当前节点：<span id="editableDiv" contenteditable="true">JSON.' + n + '</span>');
+        }(e)) : (r.hide(), window.statusBarCheckInterval(true))
     };
 
     function d(e) {

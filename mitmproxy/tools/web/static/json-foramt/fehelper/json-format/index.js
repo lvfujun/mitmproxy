@@ -202,3 +202,52 @@ const observedElement = document.getElementById("jfContent");
 if (observedElement) {
     resizeObserver.observe(observedElement);
 }
+
+// 开始观察 "#jfContent_pre" 元素
+const observedElement2 = document.getElementById("jfContent_pre");
+if (observedElement2) {
+    resizeObserver.observe(observedElement2);
+}
+
+// 创建一个定时器，每500ms检查一次statusBar元素是否存在
+let statusBarObserver;
+
+const statusBarCheckInterval = ((isHide) => {
+    const statusBar = document.getElementById('statusBar');
+    if (isHide) {
+        // 发送新的statusBar内容给父窗口
+        window.parent.postMessage({
+            statusBarContent: "",
+            isHide: isHide
+        }, "*");
+    }
+    if (statusBar && !statusBarObserver) {
+        // statusBar元素存在且还没有开始观察
+        // 观察器的配置（需要观察什么变动）
+        const config = {attributes: true, childList: true, subtree: true};
+
+        // 当观察到变动时执行的回调函数
+        const callback = function (mutationsList, observer) {
+            for (let mutation of mutationsList) {
+                if (mutation.type === 'childList') {
+                    // 发送新的statusBar内容给父窗口
+                    window.parent.postMessage({
+                        statusBarContent: statusBar.innerHTML,
+                        isHide: isHide
+                    }, "*");
+                }
+            }
+        };
+
+        // 创建一个观察器实例并传入回调函数
+        statusBarObserver = new MutationObserver(callback);
+
+        // 以上述配置开始观察目标节点
+        statusBarObserver.observe(statusBar, config);
+    } else if (!statusBar && statusBarObserver) {
+        // statusBar元素不存在，但是观察器还在运行，所以停止观察
+        statusBarObserver.disconnect();
+        statusBarObserver = null;
+    }
+});
+window.statusBarCheckInterval = statusBarCheckInterval;

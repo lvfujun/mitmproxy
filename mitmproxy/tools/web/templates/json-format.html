@@ -2,10 +2,17 @@
 <html lang="zh-CN">
 <head>
     <link rel="prefetch" href="http://www.webhek.com/misc/3d-album/"/>
-    <link rel="stylesheet" href="../static/json-foramt/fehelper/json-format/index.css?v=4b05f4643">
+    <link rel="stylesheet" href="../static/json-foramt/fehelper/json-format/index.css?v=4b05f4643202312">
     <script type="text/javascript" src="../static/json-foramt/fehelper/static/vendor/vue/vue.js?v=4b6ac71fa"></script>
 </head>
-
+<style>
+    #statusBar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    /* 其他样式，例如背景色、边框等 */
+}
+</style>
 <script>
     const myJson = localStorage.getItem("rawJson")
 </script>
@@ -26,7 +33,7 @@
             </h3>
         </div>
     </div>
-    <div class="x-toolbar x-inpage">
+    <div class="x-toolbar x-inpage" style="margin-right: 0px">
         <div style="display: none;">
             <button id="btnFormat" class="btn btn-primary btn-xs ui-mr-10" @click="format">格式化</button>
             <button id="btnCompress" class="btn btn-success btn-xs" @click="compress">压缩</button>
@@ -54,7 +61,7 @@
             class="xjf-btn xjf-btn-mid" @click="uniDecode">Uni解码</button><button class="xjf-btn xjf-btn-right"
                                                                                    @click="urlDecode">URL解码</button> </span><span
             id="optionBar"></span></div>
-    <div class="panel-body mod-json">
+    <div class="panel-body mod-json" style="margin-right: -15px;">
         <div class="row panel-txt" style="display: none; width:0px;"><textarea class="form-control mod-textarea"
                                                                                id="jsonSource"
                                                                                placeholder="在这里粘贴您需要进行格式化的JSON代码"
@@ -75,7 +82,7 @@
 <script src="../static/json-foramt/fehelper/static/vendor/codemirror/matchbrackets.js?v=4e8ceebb8"></script>
 <script src="../static/json-foramt/fehelper/static/vendor/codemirror/placeholder.js?v=41c8b56be"></script>
 <script src="../static/json-foramt/fehelper/json-format/json-lint.js?v=49d40e97d"></script>
-<script src="../static/json-foramt/fehelper/json-format/content-script.js?v=4cc14877d"></script>
-<script src="../static/json-foramt/fehelper/json-format/index.js?v=4065782ae2222" type="module"></script>
+<script src="../static/json-foramt/fehelper/json-format/content-script.js?v=4cc14877202312"></script>
+<script src="../static/json-foramt/fehelper/json-format/index.js?v=4065782ae202312" type="module"></script>
 </body>
 </html>

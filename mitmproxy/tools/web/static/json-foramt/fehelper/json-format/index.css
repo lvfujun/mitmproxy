@@ -7860,6 +7860,7 @@ body>#optionBar,body>#jfContent {
 }
 
 #statusBar {
+    display: none;
     position: fixed;
     bottom: 0;
     left: 0;
