@@ -19,7 +19,7 @@ with open(os.path.join(here, "mitmproxy", "version.py")) as f:
     VERSION = match.group(1)
 
 setup(
-    name="mitmproxy",
+    name="ty-proxy",
     version=VERSION,
     description="An interactive, SSL/TLS-capable intercepting proxy for HTTP/1, HTTP/2, and WebSockets.",
     long_description=long_description,
@@ -94,7 +94,8 @@ setup(
         "publicsuffix2>=2.20190812,<3",
         "zstandard>=0.11,<0.18",
         "werkzeug>=2.3.7,<3",
-        "piexif>=1.1.3,<2"
+        "piexif>=1.1.3,<2",
+        "ping3>=4.0.4,<5",
     ],
     extras_require={
         ':sys_platform == "win32"': [
