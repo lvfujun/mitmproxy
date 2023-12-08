@@ -1,8 +1,8 @@
 # 使用一个包含 Python 和 mitmproxy 的基础镜像
 FROM python:3.9
 USER root
-ENV http_proxy=http://172.16.6.111:7890
-ENV https_proxy=http://172.16.6.111:7890
+ENV http_proxy=http://192.168.0.132:7890
+ENV https_proxy=http://192.168.0.132:7890
 ENV PYTHONOPTIMIZE=2
 VOLUME /certs
 VOLUME /script
