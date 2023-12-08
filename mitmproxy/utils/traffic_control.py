@@ -1,6 +1,8 @@
 import subprocess
 import json
 
+from mitmproxy import ctx
+
 
 class TrafficControl:
 
@@ -9,7 +11,7 @@ class TrafficControl:
 
     # 内部方法，用于执行命令
     def _execute(self, command):
-        print(command)
+        ctx.log.info(command)
         process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         # if process.returncode != 0:
         #     raise Exception(f"执行命令失败: {command}. 错误: {process.stderr}")

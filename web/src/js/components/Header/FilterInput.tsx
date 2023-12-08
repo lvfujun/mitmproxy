@@ -65,13 +65,40 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
         }
     }
 
-    onChange(e) {
-        const value = e.target.value
-        this.setState({value})
+    fetchFilterData(filterParam) {
+        return fetch(`/flows/filter?filter=${encodeURIComponent(filterParam)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    }
 
-        // Only propagate valid filters upwards.
-        if (this.isValid(value)) {
-            this.props.onChange(value)
+    onChange(e) {
+        const value = e.target.value;
+        this.setState({value});
+
+        // 检查输入是否以 "~bs " 开头
+        if (value.includes("~bs ") || value.includes("~b ") || value.includes("~bq ")) {
+            // 使用新的 fetchFilterData 函数
+            this.fetchFilterData(value)
+                .then(data => {
+                    window.filterList = data
+                    // 在这里处理你的数据
+                    // 在获取数据成功后执行isValid函数
+                    // Only propagate valid filters upwards.
+                    if (this.isValid(value)) {
+                        this.props.onChange(value);
+                    }
+                });
+        } else {
+            if (this.isValid(value)) {
+                this.props.onChange(value);
+            }
         }
     }
 
@@ -112,7 +139,11 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
     select() {
         ReactDOM.findDOMNode(this.refs.input).select()
     }
-
+    componentDidMount() {
+        if (this.state.value) {
+            this.onChange({ target: { value: this.state.value } });
+        }
+    }
     render() {
         const {type, color, placeholder} = this.props
         const {value, focus, mousefocus} = this.state

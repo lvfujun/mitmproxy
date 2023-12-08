@@ -2058,15 +2058,18 @@ export default (function() {
         }
         return false;
     }
-    assetFilter.desc = "is asset";
+    assetFilter.desc = "仅过滤静态资源";
 
     // ~b
     function body(regex){
         regex = new RegExp(regex, "i");
         function bodyFilter(flow){
-            return regex.test(flow.comment)
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
-        bodyFilter.desc = "body filters " + regex;
+        bodyFilter.desc = "内容 过滤 " + regex;
         return bodyFilter;
     }
 
@@ -2074,9 +2077,12 @@ export default (function() {
     function requestBody(regex){
         regex = new RegExp(regex, "i");
         function requestBodyFilter(flow){
-            return true;
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
-        requestBodyFilter.desc = "body filters 还没实现";
+        requestBodyFilter.desc = "请求内容 过滤 " + regex;
         return requestBodyFilter;
     }
 
@@ -2084,9 +2090,12 @@ export default (function() {
     function responseBody(regex){
         regex = new RegExp(regex, "i");
         function responseBodyFilter(flow){
-            return true;
+            if (window.filterList && window.filterList.includes(flow.incId)) {
+                return true
+            }
+            return false;
         }
-        responseBodyFilter.desc = "body filters 还没实现";
+        responseBodyFilter.desc = "响应内容 过滤 " + regex;
         return responseBodyFilter;
     }
 
@@ -2095,7 +2104,7 @@ export default (function() {
         function responseCodeFilter(flow){
             return flow.response && flow.response.status_code === code;
         }
-        responseCodeFilter.desc = "resp. code is " + code;
+        responseCodeFilter.desc = "状态码 is " + code;
         return responseCodeFilter;
     }
 
@@ -2105,7 +2114,7 @@ export default (function() {
         function commentFilter(flow){
             return regex.test(flow.comment)
         }
-        commentFilter.desc = "comment matches " + regex;
+        commentFilter.desc = "评论过滤 " + regex;
         return commentFilter;
     }
 
@@ -2115,7 +2124,7 @@ export default (function() {
         function domainFilter(flow){
             return flow.request && (regex.test(flow.request.host) || regex.test(flow.request.pretty_host));
         }
-        domainFilter.desc = "domain matches " + regex;
+        domainFilter.desc = "域名过滤 " + regex;
         return domainFilter;
     }
 
@@ -2133,7 +2142,7 @@ export default (function() {
                &&
                regex.test(flow.server_conn.address[0] + ":" + flow.server_conn.address[1]);
         }
-        destinationFilter.desc = "destination address matches " + regex;
+        destinationFilter.desc = "过滤目的地IP " + regex;
         return destinationFilter;
     }
 
@@ -2153,7 +2162,7 @@ export default (function() {
                 (flow.response && flowutils.ResponseUtils.match_header(flow.response, regex))
             );
         }
-        headerFilter.desc = "header matches " + regex;
+        headerFilter.desc = "header 过滤 " + regex;
         return headerFilter;
     }
 
@@ -2163,7 +2172,7 @@ export default (function() {
         function requestHeaderFilter(flow){
             return (flow.request && flowutils.RequestUtils.match_header(flow.request, regex));
         }
-        requestHeaderFilter.desc = "req. header matches " + regex;
+        requestHeaderFilter.desc = "请求. header 过滤 " + regex;
         return requestHeaderFilter;
     }
 
@@ -2173,7 +2182,7 @@ export default (function() {
         function responseHeaderFilter(flow){
             return (flow.response && flowutils.ResponseUtils.match_header(flow.response, regex));
         }
-        responseHeaderFilter.desc = "resp. header matches " + regex;
+        responseHeaderFilter.desc = "响应. header 过滤 " + regex;
         return responseHeaderFilter;
     }
 
@@ -2181,13 +2190,13 @@ export default (function() {
     function httpFilter(flow){
         return flow.type === "http";
     }
-    httpFilter.desc = "is an HTTP Flow";
+    httpFilter.desc = "仅过滤http协议";
 
     // ~marked
     function markedFilter(flow){
         return flow.marked;
     }
-    markedFilter.desc = "is marked";
+    markedFilter.desc = "过滤有标记的";
 
     // ~marker
     function marker(regex){
@@ -2195,7 +2204,7 @@ export default (function() {
         function markerFilter(flow){
             return regex.test(flow.marked)
         }
-        markerFilter.desc = "marker matches " + regex;
+        markerFilter.desc = "按标记颜色过滤 " + regex;
         return markerFilter;
     }
 
@@ -2205,7 +2214,7 @@ export default (function() {
         function methodFilter(flow){
             return flow.request && regex.test(flow.request.method);
         }
-        methodFilter.desc = "method matches " + regex;
+        methodFilter.desc = "method 过滤 " + regex;
         return methodFilter;
     }
 
@@ -2213,7 +2222,7 @@ export default (function() {
     function noResponseFilter(flow){
         return flow.request && !flow.response;
     }
-    noResponseFilter.desc = "has no response";
+    noResponseFilter.desc = "过滤没有响应的请求";
 
     // ~replayq
     function clientReplayFilter(flow){
@@ -2241,7 +2250,7 @@ export default (function() {
                    &&
                    regex.test(flow.client_conn.peername[0] + ":" + flow.client_conn.peername[1]);
         }
-        sourceFilter.desc = "source address matches " + regex;
+        sourceFilter.desc = "source address 过滤 " + regex;
         return sourceFilter;
     }
 
@@ -2249,7 +2258,7 @@ export default (function() {
     function responseFilter(flow){
         return !!flow.response;
     }
-    responseFilter.desc = "has response";
+    responseFilter.desc = "仅过滤有响应的";
 
     // ~tcp
     function tcpFilter(flow){
@@ -2263,7 +2272,7 @@ export default (function() {
         function requestContentTypeFilter(flow){
             return flow.request && regex.test(flowutils.RequestUtils.getContentType(flow.request));
         }
-        requestContentTypeFilter.desc = "req. content type matches " + regex;
+        requestContentTypeFilter.desc = "请求. content-type matches " + regex;
         return requestContentTypeFilter;
     }
 
@@ -2273,7 +2282,7 @@ export default (function() {
         function responseContentTypeFilter(flow){
             return flow.response && regex.test(flowutils.ResponseUtils.getContentType(flow.response));
         }
-        responseContentTypeFilter.desc = "resp. content type matches " + regex;
+        responseContentTypeFilter.desc = "响应 content-type 过滤 " + regex;
         return responseContentTypeFilter;
     }
 
@@ -2287,7 +2296,7 @@ export default (function() {
                 (flow.response && regex.test(flowutils.ResponseUtils.getContentType(flow.response)))
             );
         }
-        contentTypeFilter.desc = "content type matches " + regex;
+        contentTypeFilter.desc = "content-type 过滤 " + regex;
         return contentTypeFilter;
     }
 
@@ -2301,7 +2310,7 @@ export default (function() {
             }
             return flow.request && regex.test(flowutils.RequestUtils.pretty_url(flow.request));
         }
-        urlFilter.desc = "url matches " + regex;
+        urlFilter.desc = "Path 过滤 " + regex;
         return urlFilter;
     }
 
@@ -2309,7 +2318,7 @@ export default (function() {
     function websocketFilter(flow){
         return !!flow.websocket;
     }
-    websocketFilter.desc = "is a Websocket Flow";
+    websocketFilter.desc = "仅过滤websocket流量";
 
 
     peg$result = peg$startRuleFunction();

@@ -34,6 +34,7 @@
 """
 
 import functools
+import json
 import re
 import sys
 from collections.abc import Sequence
@@ -41,6 +42,7 @@ from typing import ClassVar, Protocol, Union
 import pyparsing as pp
 
 from mitmproxy import dns, flow, http, tcp
+from mitmproxy.utils.strutils import escaped_str_to_bytes
 
 
 def only(*types):
@@ -79,7 +81,7 @@ class _Action(_Token):
 
 class FErr(_Action):
     code = "e"
-    help = "匹配发生错误的请求"
+    help = "过滤发生错误的请求"
 
     def __call__(self, f):
         return True if f.error else False
@@ -87,7 +89,7 @@ class FErr(_Action):
 
 class FMarked(_Action):
     code = "marked"
-    help = "匹配所有被标记的请求"
+    help = "过滤所有被标记的请求"
 
     def __call__(self, f):
         return bool(f.marked)
@@ -95,7 +97,7 @@ class FMarked(_Action):
 
 class FHTTP(_Action):
     code = "http"
-    help = "匹配所有http请求"
+    help = "过滤所有http请求"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
@@ -104,7 +106,7 @@ class FHTTP(_Action):
 
 class FWebSocket(_Action):
     code = "websocket"
-    help = "匹配所有websocket请求"
+    help = "过滤所有websocket请求"
 
     @only(http.HTTPFlow)
     def __call__(self, f: http.HTTPFlow):
@@ -113,7 +115,7 @@ class FWebSocket(_Action):
 
 class FTCP(_Action):
     code = "tcp"
-    help = "匹配tcp请求"
+    help = "过滤tcp请求"
 
     @only(tcp.TCPFlow)
     def __call__(self, f):
@@ -122,7 +124,7 @@ class FTCP(_Action):
 
 class FDNS(_Action):
     code = "dns"
-    help = "匹配DNS请求"
+    help = "过滤DNS请求"
 
     @only(dns.DNSFlow)
     def __call__(self, f):
@@ -131,7 +133,7 @@ class FDNS(_Action):
 
 class FReq(_Action):
     code = "q"
-    help = "匹配所有未响应的请求"
+    help = "过滤所有未响应的请求"
 
     @only(http.HTTPFlow, dns.DNSFlow)
     def __call__(self, f):
@@ -141,7 +143,7 @@ class FReq(_Action):
 
 class FResp(_Action):
     code = "s"
-    help = "匹配所有有返回值的请求"
+    help = "过滤所有有返回值的请求"
 
     @only(http.HTTPFlow, dns.DNSFlow)
     def __call__(self, f):
@@ -150,7 +152,7 @@ class FResp(_Action):
 
 class FAll(_Action):
     code = "all"
-    help = "匹配全部请求"
+    help = "过滤全部请求"
 
     def __call__(self, f: flow.Flow):
         return True
@@ -179,7 +181,7 @@ def _check_content_type(rex, message):
 
 class FAsset(_Action):
     code = "a"
-    help = "Match asset in response: CSS, JavaScript, images, fonts."
+    help = "仅过滤静态资源：CSS，JavaScript，图片，字体。"
     ASSET_TYPES = [
         re.compile(x)
         for x in [
@@ -204,7 +206,7 @@ class FAsset(_Action):
 
 class FContentType(_Rex):
     code = "t"
-    help = "Content-type header"
+    help = "Content-type header （例：~t image）"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
@@ -217,7 +219,7 @@ class FContentType(_Rex):
 
 class FContentTypeRequest(_Rex):
     code = "tq"
-    help = "Request Content-Type header"
+    help = "Request Content-Type header（例：~tq json）"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
@@ -226,7 +228,7 @@ class FContentTypeRequest(_Rex):
 
 class FContentTypeResponse(_Rex):
     code = "ts"
-    help = "Response Content-Type header"
+    help = "Response Content-Type header（例：~ts image）"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
@@ -237,7 +239,7 @@ class FContentTypeResponse(_Rex):
 
 class FHead(_Rex):
     code = "h"
-    help = "Header"
+    help = "Header （例：~h X-Request-Id）"
     flags = re.MULTILINE
 
     @only(http.HTTPFlow)
@@ -251,7 +253,7 @@ class FHead(_Rex):
 
 class FHeadRequest(_Rex):
     code = "hq"
-    help = "Request header"
+    help = "过滤请求 header（例：~hq x-sign）"
     flags = re.MULTILINE
 
     @only(http.HTTPFlow)
@@ -262,7 +264,7 @@ class FHeadRequest(_Rex):
 
 class FHeadResponse(_Rex):
     code = "hs"
-    help = "Response header"
+    help = "过滤响应 header（例：~hs vpc-iapi-web-04）"
     flags = re.MULTILINE
 
     @only(http.HTTPFlow)
@@ -273,18 +275,47 @@ class FHeadResponse(_Rex):
 
 class FBod(_Rex):
     code = "b"
-    help = "Body"
+    help = "过滤接口内容（例：~b 限量卡）"
     flags = re.DOTALL
 
     @only(http.HTTPFlow, tcp.TCPFlow, dns.DNSFlow)
     def __call__(self, f):
+        json_mime_types = ["application/json", "application/json-rpc", "application/jsonp"]
+
         if isinstance(f, http.HTTPFlow):
-            if f.request and f.request.raw_content:
-                if self.re.search(f.request.get_content(strict=False)):
+            # Handle HTTP response
+            if f.response:
+                content_type = f.response.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.response.get_content(strict=False)
+                        # 新的JSONP格式
+                        jsonp_pattern_new = rb'^[\w].+?\((.+)\)$'
+                        match = re.match(jsonp_pattern_new, content)
+                        if match:
+                            json_content = match.group(1).decode("utf-8")
+                        else:
+                            json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.response.raw_content and self.re.search(f.response.get_content(strict=False)):
                     return True
-            if f.response and f.response.raw_content:
-                if self.re.search(f.response.get_content(strict=False)):
+            # Handle HTTP request
+            if f.request:
+                content_type = f.request.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.request.get_content(strict=False)
+                        json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.request.raw_content and self.re.search(f.request.get_content(strict=False)):
                     return True
+            # Handle websocket
             if f.websocket:
                 for msg in f.websocket.messages:
                     if self.re.search(msg.content):
@@ -303,7 +334,7 @@ class FBod(_Rex):
 
 class FBodRequest(_Rex):
     code = "bq"
-    help = "Request body"
+    help = "过滤请求内容（例：~bq xxx）"
     flags = re.DOTALL
 
     @only(http.HTTPFlow, tcp.TCPFlow, dns.DNSFlow)
@@ -327,19 +358,36 @@ class FBodRequest(_Rex):
 
 class FBodResponse(_Rex):
     code = "bs"
-    help = "Response body"
+    help = "过滤响应内容（~bs 512700）"
     flags = re.DOTALL
 
     @only(http.HTTPFlow, tcp.TCPFlow, dns.DNSFlow)
     def __call__(self, f):
+        json_mime_types = ["application/json", "application/json-rpc", "application/jsonp"]
+
         if isinstance(f, http.HTTPFlow):
-            if f.response and f.response.raw_content:
-                if self.re.search(f.response.get_content(strict=False)):
+            if f.response:
+                content_type = f.response.headers.get('Content-Type', '').split(';')[0]
+                if any(mime in content_type for mime in json_mime_types):
+                    try:
+                        content = f.response.get_content(strict=False)
+                        # 新的JSONP格式
+                        jsonp_pattern_new = rb'^[\w].+?\((.+)\)$'
+                        match = re.match(jsonp_pattern_new, content)
+                        if match:
+                            json_content = match.group(1).decode("utf-8")
+                        else:
+                            json_content = json.loads(content)
+                        if self.re.search(escaped_str_to_bytes(json.dumps(json_content, ensure_ascii=False))):
+                            return True
+                    except Exception as e:
+                        print(e)
+                elif f.response.raw_content and self.re.search(f.response.get_content(strict=False)):
                     return True
-            if f.websocket:
-                for msg in f.websocket.messages:
-                    if not msg.from_client and self.re.search(msg.content):
-                        return True
+                if f.websocket:
+                    for msg in f.websocket.messages:
+                        if not msg.from_client and self.re.search(msg.content):
+                            return True
         elif isinstance(f, tcp.TCPFlow):
             for msg in f.messages:
                 if not msg.from_client and self.re.search(msg.content):
@@ -348,10 +396,9 @@ class FBodResponse(_Rex):
             if f.response and self.re.search(f.response.content):
                 return True
 
-
 class FMethod(_Rex):
     code = "m"
-    help = "Method"
+    help = "Method（例：~m get）"
     flags = re.IGNORECASE
 
     @only(http.HTTPFlow)
@@ -361,7 +408,7 @@ class FMethod(_Rex):
 
 class FDomain(_Rex):
     code = "d"
-    help = "Domain"
+    help = "Domain（例：~d 66rpg）"
     flags = re.IGNORECASE
     is_binary = False
 
@@ -374,7 +421,7 @@ class FDomain(_Rex):
 
 class FUrl(_Rex):
     code = "u"
-    help = "URL"
+    help = "PATH（例：game_info）"
     is_binary = False
 
     # FUrl is special, because it can be "naked".
@@ -397,7 +444,7 @@ class FUrl(_Rex):
 
 class FSrc(_Rex):
     code = "src"
-    help = "匹配请求来源IP"
+    help = "过滤请求来源IP"
     is_binary = False
 
     def __call__(self, f):
@@ -409,7 +456,7 @@ class FSrc(_Rex):
 
 class FDst(_Rex):
     code = "dst"
-    help = "匹配目的地IP"
+    help = "过滤目的地IP"
     is_binary = False
 
     def __call__(self, f):
@@ -421,7 +468,7 @@ class FDst(_Rex):
 
 class FReplay(_Action):
     code = "replay"
-    help = "匹配重复过的请求"
+    help = "过滤重复过的请求"
 
     def __call__(self, f):
         return f.is_replay is not None
@@ -429,7 +476,7 @@ class FReplay(_Action):
 
 class FReplayClient(_Action):
     code = "replayq"
-    help = "匹配劫持过的请求"
+    help = "过滤劫持过的请求"
 
     def __call__(self, f):
         return f.is_replay == "request"
@@ -437,7 +484,7 @@ class FReplayClient(_Action):
 
 class FReplayServer(_Action):
     code = "replays"
-    help = "匹配劫持过响应内容的请求"
+    help = "过滤劫持过响应内容的请求"
 
     def __call__(self, f):
         return f.is_replay == "response"
@@ -445,7 +492,7 @@ class FReplayServer(_Action):
 
 class FMeta(_Rex):
     code = "meta"
-    help = "Flow metadata（暂不支持）"
+    help = "Flow metadata"
     flags = re.MULTILINE
     is_binary = False
 
@@ -480,7 +527,7 @@ class _Int(_Action):
 
 class FCode(_Int):
     code = "c"
-    help = "HTTP response code"
+    help = "匹配状态码（例：~c 200)"
 
     @only(http.HTTPFlow)
     def __call__(self, f):
