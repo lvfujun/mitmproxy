@@ -69,7 +69,7 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
         return fetch(`/flows/filter?filter=${encodeURIComponent(filterParam)}`)
             .then(response => {
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    return {}
                 }
                 return response.json();
             })
@@ -141,9 +141,19 @@ export default class FilterInput extends Component<FilterInputProps, FilterInput
     }
     componentDidMount() {
         if (this.state.value) {
+            this.interval = setInterval(() => {
+                this.onChange({ target: { value: this.state.value } });
+            }, 1000);
             this.onChange({ target: { value: this.state.value } });
         }
     }
+
+    componentWillUnmount() {
+        if (this.interval) {
+            clearInterval(this.interval);
+        }
+    }
+
     render() {
         const {type, color, placeholder} = this.props
         const {value, focus, mousefocus} = this.state

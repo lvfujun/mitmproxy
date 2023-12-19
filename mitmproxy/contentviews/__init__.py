@@ -37,7 +37,7 @@ from . import (
     protobuf,
     msgpack,
     graphql,
-    grpc,
+    grpc, rkeydecode,
 )
 from .base import View, KEY_MAX, format_text, format_dict, TViewResult
 from ..http import HTTPFlow
@@ -200,7 +200,8 @@ def get_content_view(
             data, content_type=content_type, flow=flow, http_message=http_message
         )[1]
         error = f"{getattr(viewmode, 'name')} content viewer failed: \n{traceback.format_exc()}"
-
+    if "JSON" in desc:
+        return desc, content, error
     return desc, safe_to_print(content), error
 
 
@@ -210,6 +211,7 @@ add(raw.ViewRaw())
 add(hex.ViewHex())
 add(graphql.ViewGraphQL())
 add(json.ViewJSON())
+add(rkeydecode.ViewRKEY())
 add(xml_html.ViewXmlHtml())
 add(wbxml.ViewWBXML())
 add(javascript.ViewJavaScript())

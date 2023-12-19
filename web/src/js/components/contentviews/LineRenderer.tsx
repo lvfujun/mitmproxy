@@ -9,7 +9,7 @@ type ContentLinesRendererProps = {
 }
 
 const LineRenderer: React.FC<ContentLinesRendererProps> = React.memo(
-    function LineRenderer({ lines, rawJson, description = "", maxLines, showMore }) {
+    function LineRenderer({lines, rawJson, description = "", maxLines, showMore}) {
         if (!Array.isArray(lines) || lines.length === 0) {
             return null;
         }
@@ -28,6 +28,12 @@ function FrameWrapper(rawJson: string) {
     const [height, setHeight] = React.useState("0px");
     const [divContent, setDivContent] = useState<string>('');
     const [divWidth, setDivWidth] = useState<string>('auto');
+    const [iframeKey, setIframeKey] = useState<number>(0); // 添加一个状态来追踪 iframe 的 key
+
+    // 当 rawJson 发生变化时，更新 iframe 的 key 以重新加载 iframe
+    useEffect(() => {
+        setIframeKey(prevKey => prevKey + 1); // 改变 key 以重新加载 iframe
+    }, [rawJson]); // rawJson 改变时触发
 
     useEffect(() => {
         window.addEventListener("message", (event) => {
@@ -80,6 +86,8 @@ function FrameWrapper(rawJson: string) {
     return (
         <>
             <iframe
+                key={iframeKey} // 使用 key 强制重新渲染 iframe
+
                 ref={ref}
                 onLoad={onLoad}
                 id="myFrame"
@@ -110,7 +118,7 @@ function FrameWrapper(rawJson: string) {
                         color: "#666",
                         marginLeft: '-10px',
                     }}
-                    dangerouslySetInnerHTML={{ __html: divContent }}
+                    dangerouslySetInnerHTML={{__html: divContent}}
                 />
             }
         </>
@@ -122,8 +130,8 @@ function QueryLineRenderer(lines: [string, string][][], maxLines: number, showMo
         {lines.map((line, i) =>
             i === maxLines
                 ? <button key="showmore" onClick={showMore}
-                    className="btn btn-xs btn-info">
-                    <i className="fa fa-angle-double-down" aria-hidden="true" /> Show more
+                          className="btn btn-xs btn-info">
+                    <i className="fa fa-angle-double-down" aria-hidden="true"/> Show more
                 </button>
                 : <div key={i}>
                     {line.map(([style, text], j) => <span key={j} className={style}>{text}</span>)}

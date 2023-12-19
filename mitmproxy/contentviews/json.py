@@ -43,15 +43,26 @@ class ViewJSON(base.View):
 
     def __call__(self, data, **metadata):
         type = "JSON"
-        if metadata['content_type'] == "application/json":
-            # 支持JSONP
-            matchObj = re.match(r'^[\w].+?\((.+)\)$', data.decode("utf-8"), re.M | re.I)
-            if matchObj is not None and matchObj.group(1) is not None:
-                data = matchObj.group(1).encode("utf-8")
+        if "content_type" in metadata and metadata['content_type']:
+            if "application/jsonp" in metadata['content_type']:
                 type = "JSONP"
-        data = parse_json(data)
+                matchObj = re.match(r'^[\w]+\((\{.*\})\);', data.decode("utf-8"), re.M | re.I)
+                if matchObj is not None and matchObj.group(1) is not None:
+                    # data = matchObj.group(1)
+                    type = "JSONP"
+                # else:
+                #     data = data.decode("utf-8")
+
+            elif "application/json" in metadata['content_type']:
+                # 支持JSONP
+                matchObj = re.match(r'^[\w].+?\((.+)\)$', data.decode("utf-8"), re.M | re.I)
+                if matchObj is not None and matchObj.group(1) is not None:
+                    # data = matchObj.group(1)
+                    type = "JSONP"
+                # else:
+                #     data = data.decode("utf-8")
         if data is not PARSE_ERROR:
-            return type, format_json(data)
+            return type, data.decode("utf-8")
 
     def render_priority(
         self, data: bytes, *, content_type: Optional[str] = None, **metadata
@@ -63,11 +74,11 @@ class ViewJSON(base.View):
             "application/json-rpc",
             "application/jsonp",
         ):
-            return 1
+            return 1.1
         if (
             content_type
             and content_type.startswith("application/")
             and content_type.endswith("+json")
         ):
-            return 1
+            return 1.1
         return 0

@@ -525,16 +525,20 @@ class FlowContentView(RequestHandler):
         )
         if error:
             self.master.log.error(error)
-        if max_lines:
-            lines = islice(lines, max_lines)
+
         try:
-            rawJson = str(message.content.decode("utf-8"))
+            if "JSON" in description:
+                rawJson = str(lines)
+            else:
+                if max_lines:
+                    lines = islice(lines, max_lines)
+                rawJson = ""
         except Exception:
             rawJson = ""
         return dict(
             lines=list(lines),
             description=description,
-            rawJson=rawJson
+            rawJson=rawJson.rstrip(";")
         )
 
     def get(self, flow_id, message, content_view):
